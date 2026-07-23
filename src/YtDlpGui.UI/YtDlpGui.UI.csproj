@@ -1,0 +1,26 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0-windows</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <UseWPF>true</UseWPF>
+    <IsPublishable>false</IsPublishable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\YtDlpGui.Abstractions\YtDlpGui.Abstractions.csproj" />
+    <ProjectReference Include="..\YtDlpGui.Core\YtDlpGui.Core.csproj" />
+    <ProjectReference Include="..\YtDlpGui.Application\YtDlpGui.Application.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="CommunityToolkit.Mvvm" Version="8.2.2" />
+  </ItemGroup>
+
+  <!-- Window icon, linked from the shared assets folder (single source of truth). -->
+  <ItemGroup Condition="Exists('..\..\assets\scachalka.ico')">
+    <Resource Include="..\..\assets\scachalka.ico" Link="Assets\scachalka.ico" />
+  </ItemGroup>
+
+</Project>

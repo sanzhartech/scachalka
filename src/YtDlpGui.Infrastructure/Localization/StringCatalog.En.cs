@@ -1,0 +1,84 @@
+using YtDlpGui.Abstractions.Localization;
+
+namespace YtDlpGui.Infrastructure.Localization;
+
+/// <summary>English string catalog (default / fallback language).</summary>
+internal static partial class StringCatalog
+{
+    public static IReadOnlyDictionary<string, string> English { get; } = new Dictionary<string, string>
+    {
+        [LocKeys.ToolsChecking] = "Checking for yt-dlp and FFmpeg…",
+        [LocKeys.ToolsRecheck] = "Re-check tools",
+        [LocKeys.ToolsReadyFormat] = "yt-dlp {0} · {1}",
+        [LocKeys.ToolsMissingFormat] = "Missing: {0}. Install them (e.g. \"winget install yt-dlp.yt-dlp Gyan.FFmpeg\") or put the .exe files next to Scachalka.exe.",
+        [LocKeys.ToolsMissingJoin] = " and ",
+        [LocKeys.ToolsCheckFailed] = "Tool check failed — see the log.",
+
+        [LocKeys.UrlHint] = "Video / audio URLs — one or many, separated by spaces or new lines. Drag & drop works too.",
+        [LocKeys.BtnAddToQueue] = "Add to queue",
+        [LocKeys.BtnAddTooltip] = "Ctrl+Enter",
+        [LocKeys.BtnPasteAdd] = "Paste & add",
+        [LocKeys.BtnPasteTooltip] = "Ctrl+Shift+V — add URLs straight from the clipboard",
+
+        [LocKeys.LabelFormat] = "Format",
+        [LocKeys.LabelQuality] = "Quality",
+        [LocKeys.LabelOutputFolder] = "Output folder",
+        [LocKeys.LabelLanguage] = "Language",
+        [LocKeys.BtnBrowse] = "Browse…",
+        [LocKeys.BtnOpenFolder] = "Open folder",
+        [LocKeys.CheckDarkTheme] = "Dark theme",
+
+        [LocKeys.AdvHeader] = "Advanced yt-dlp options",
+        [LocKeys.AdvPlaylists] = "Download playlists",
+        [LocKeys.AdvPlaylistsTip] = "When the URL is a playlist, download every item into a playlist subfolder",
+        [LocKeys.AdvMetadata] = "Embed metadata & chapters",
+        [LocKeys.AdvThumbnail] = "Embed thumbnail",
+        [LocKeys.AdvThumbnailTip] = "Cover art for video and audio files (not supported for WAV)",
+        [LocKeys.AdvSubtitles] = "Embed subtitles",
+        [LocKeys.AdvSubtitlesTip] = "Video formats only",
+        [LocKeys.AdvSubLangsTip] = "Subtitle languages for --sub-langs, e.g. en,ru or all (empty = yt-dlp default)",
+        [LocKeys.AdvCookies] = "Cookies from browser",
+        [LocKeys.AdvCookiesTip] = "Use your browser's cookies for private, age-restricted or member-only videos",
+        [LocKeys.AdvExtraArgs] = "Extra yt-dlp arguments (applied to every download, override any default)",
+        [LocKeys.AdvExtraArgsTip] = "Full yt-dlp power: e.g. --limit-rate 2M --live-from-start --proxy socks5://127.0.0.1:1080",
+        [LocKeys.CookieNone] = "None",
+
+        [LocKeys.QueueTitle] = "Download queue",
+        [LocKeys.QueueClearFinished] = "Clear finished",
+        [LocKeys.JobCancel] = "Cancel",
+        [LocKeys.JobRetry] = "Retry",
+        [LocKeys.JobShowInFolder] = "Show in folder",
+        [LocKeys.JobEtaPrefix] = "ETA",
+        [LocKeys.LogHeader] = "Log",
+
+        [LocKeys.StageQueued] = "Queued",
+        [LocKeys.StageQueuedRetryFormat] = "Queued (retry #{0})",
+        [LocKeys.StageResolving] = "Fetching metadata…",
+        [LocKeys.StageDownloading] = "Downloading",
+        [LocKeys.StageMerging] = "Merging",
+        [LocKeys.StageConverting] = "Converting",
+        [LocKeys.StageCompleted] = "Completed",
+        [LocKeys.StageFailed] = "Failed",
+        [LocKeys.StageCanceled] = "Canceled",
+
+        [LocKeys.StatusReady] = "Ready.",
+        [LocKeys.StatusNoValidUrls] = "No valid URLs found — expected http(s) links.",
+        [LocKeys.StatusToolsMissing] = "Cannot start: yt-dlp/FFmpeg are missing. Install them and press \"Re-check tools\".",
+        [LocKeys.StatusClipboardNoText] = "Clipboard does not contain text.",
+        [LocKeys.StatusCannotRetry] = "This download cannot be retried (invalid URL).",
+        [LocKeys.StatusSummaryFormat] = "{0} active · {1} queued · {2} completed · {3} failed · {4} canceled",
+
+        [LocKeys.NoteCanceled] = "Canceled by user.",
+        [LocKeys.NoteCanceledBeforeStart] = "Canceled before start.",
+        [LocKeys.NoteAlreadyExisted] = "File already existed — download skipped.",
+
+        [LocKeys.ErrorToolMissing] = "Required tool not found. Install yt-dlp and FFmpeg, then press \"Re-check tools\".",
+        [LocKeys.ErrorInvalidUrl] = "This URL is not supported or not a valid media link.",
+        [LocKeys.ErrorNetwork] = "Network problem while downloading. Check your connection and press Retry.",
+        [LocKeys.ErrorDiskFull] = "Not enough free disk space in the output folder.",
+        [LocKeys.ErrorPermission] = "No permission to write to the output folder. Choose another folder.",
+        [LocKeys.ErrorFileExists] = "The file already exists in the output folder.",
+        [LocKeys.ErrorInterrupted] = "The download was interrupted before it finished.",
+        [LocKeys.ErrorUnknown] = "The download failed unexpectedly. See the log for details."
+    };
+}

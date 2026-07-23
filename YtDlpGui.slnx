@@ -1,0 +1,13 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/YtDlpGui.Abstractions/YtDlpGui.Abstractions.csproj" />
+    <Project Path="src/YtDlpGui.App/YtDlpGui.App.csproj" />
+    <Project Path="src/YtDlpGui.Application/YtDlpGui.Application.csproj" />
+    <Project Path="src/YtDlpGui.Core/YtDlpGui.Core.csproj" />
+    <Project Path="src/YtDlpGui.Infrastructure/YtDlpGui.Infrastructure.csproj" />
+    <Project Path="src/YtDlpGui.UI/YtDlpGui.UI.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/YtDlpGui.Core.Tests/YtDlpGui.Core.Tests.csproj" />
+  </Folder>
+</Solution>
