@@ -1,0 +1,16 @@
+# Normalize line endings: keep LF in the repo, check out native on each OS.
+* text=auto
+
+*.cs      text
+*.xaml    text
+*.csproj  text
+*.sln     text
+*.md      text
+*.json    text
+*.yml     text
+*.ps1     text eol=crlf
+
+# Binary assets must never be line-ending converted.
+*.png binary
+*.ico binary
+*.exe binary
