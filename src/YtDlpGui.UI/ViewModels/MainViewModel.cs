@@ -7,6 +7,7 @@ using YtDlpGui.Abstractions.Enums;
 using YtDlpGui.Abstractions.Interfaces;
 using YtDlpGui.Abstractions.Localization;
 using YtDlpGui.Abstractions.Models;
+using YtDlpGui.Application.Import;
 using YtDlpGui.Application.Jobs;
 using YtDlpGui.Application.Queue;
 using YtDlpGui.Application.Tools;
@@ -34,6 +35,8 @@ public sealed partial class MainViewModel : ObservableObject
     private readonly IFolderService _folderService;
     private readonly IClipboardService _clipboard;
     private readonly ILocalizer _localizer;
+    private readonly ILibraryImportService _importService;
+    private readonly IBulkImportService _bulkImportService;
     private readonly Dispatcher _dispatcher;
     private readonly bool _isInitialized;
 
@@ -122,7 +125,9 @@ public sealed partial class MainViewModel : ObservableObject
         ILogSink log,
         IFolderService folderService,
         IClipboardService clipboard,
-        ILocalizer localizer)
+        ILocalizer localizer,
+        ILibraryImportService importService,
+        IBulkImportService bulkImportService)
     {
         _urlValidator = urlValidator;
         _coordinator = coordinator;
@@ -134,12 +139,16 @@ public sealed partial class MainViewModel : ObservableObject
         _folderService = folderService;
         _clipboard = clipboard;
         _localizer = localizer;
+        _importService = importService;
+        _bulkImportService = bulkImportService;
         _dispatcher = System.Windows.Application.Current.Dispatcher;
 
         ApplySettings(settings);
         _isInitialized = true;
 
         _coordinator.JobEnqueued += OnJobEnqueued;
+        _importService.ProgressChanged += OnImportProgressChanged;
+        _bulkImportService.ProgressChanged += OnBulkImportProgressChanged;
         _log.EntryAdded += OnLogEntryAdded;
         _localizer.LanguageChanged += OnLanguageChanged;
         foreach (var entry in _log.GetSnapshot())

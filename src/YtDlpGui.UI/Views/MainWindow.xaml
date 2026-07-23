@@ -33,6 +33,7 @@
             <RowDefinition Height="Auto" />
             <RowDefinition Height="Auto" />
             <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
             <RowDefinition Height="*" />
             <RowDefinition Height="Auto" />
             <RowDefinition Height="Auto" />
@@ -118,6 +119,18 @@
                             Margin="0,8,0,0"
                             Command="{Binding PasteFromClipboardCommand}"
                             ToolTip="{loc:Str Btn.PasteTooltip}" />
+                    <Button Content="{loc:Str Btn.ImportLibrary}"
+                            MinWidth="136" Height="34"
+                            Margin="0,8,0,0"
+                            Command="{Binding ImportLibraryCommand}"
+                            IsEnabled="{Binding IsImporting, Converter={StaticResource InverseBool}}"
+                            ToolTip="{loc:Str Btn.ImportLibraryTooltip}" />
+                    <Button Content="{loc:Str Btn.BulkImport}"
+                            MinWidth="136" Height="34"
+                            Margin="0,8,0,0"
+                            Command="{Binding BulkImportLinksCommand}"
+                            IsEnabled="{Binding IsImporting, Converter={StaticResource InverseBool}}"
+                            ToolTip="{loc:Str Btn.BulkImportTooltip}" />
                 </StackPanel>
             </Grid>
         </Border>
@@ -195,8 +208,55 @@
             </Grid>
         </Border>
 
+        <!-- Apple Music library import progress -->
+        <Border Grid.Row="3"
+                Background="{DynamicResource Brush.Panel}"
+                CornerRadius="10"
+                Padding="14,12"
+                Margin="0,0,0,12"
+                Visibility="{Binding IsImportPanelVisible, Converter={StaticResource BoolToVisibility}}">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                </Grid.RowDefinitions>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+
+                <TextBlock Grid.Row="0" Grid.Column="0"
+                           Text="{Binding ImportStatusText}"
+                           TextWrapping="Wrap"
+                           FontSize="13"
+                           VerticalAlignment="Center" />
+
+                <Button Grid.Row="0" Grid.Column="1"
+                        Content="{loc:Str Import.Cancel}"
+                        Margin="14,0,0,0"
+                        VerticalAlignment="Center"
+                        Command="{Binding CancelImportCommand}"
+                        Visibility="{Binding IsImporting, Converter={StaticResource BoolToVisibility}}" />
+
+                <TextBlock Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2"
+                           Text="{Binding ImportDetailText}"
+                           Style="{StaticResource SecondaryText}"
+                           TextWrapping="Wrap"
+                           Margin="0,6,0,0" />
+
+                <ProgressBar Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="2"
+                             Height="6"
+                             Margin="0,10,0,0"
+                             Minimum="0"
+                             Maximum="{Binding ImportProgressMax}"
+                             Value="{Binding ImportProgressValue, Mode=OneWay}"
+                             Visibility="{Binding IsImporting, Converter={StaticResource BoolToVisibility}}" />
+            </Grid>
+        </Border>
+
         <!-- Advanced yt-dlp options -->
-        <Expander Grid.Row="3"
+        <Expander Grid.Row="4"
                   Header="{loc:Str Adv.Header}"
                   Margin="0,0,0,12"
                   IsExpanded="False">
@@ -264,7 +324,7 @@
         </Expander>
 
         <!-- Download queue -->
-        <Border Grid.Row="4"
+        <Border Grid.Row="5"
                 Background="{DynamicResource Brush.Panel}"
                 CornerRadius="10"
                 Padding="10">
@@ -389,7 +449,7 @@
         </Border>
 
         <!-- Log window -->
-        <Expander Grid.Row="5"
+        <Expander Grid.Row="6"
                   Header="{loc:Str Log.Header}"
                   Margin="0,12,0,0"
                   IsExpanded="False">
@@ -416,7 +476,7 @@
         </Expander>
 
         <!-- Status bar -->
-        <Border Grid.Row="6"
+        <Border Grid.Row="7"
                 Background="{DynamicResource Brush.Panel}"
                 CornerRadius="8"
                 Padding="12,7"

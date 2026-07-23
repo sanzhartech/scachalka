@@ -93,10 +93,31 @@ public sealed class DownloadExecutor(
         void OnError(string line) => log.Write(LogLevel.Warning, $"[{Short(job)}] {line}");
 
         ToolResult result;
+        var usedCookieFallback = false;
         try
         {
             result = await runner.RunAsync(tools.YtDlpPath!, arguments, OnOutput, OnError, cancellationToken)
                 .ConfigureAwait(false);
+
+            // A running browser locks its cookie database (yt-dlp #7271). Instead of
+            // failing the whole download, transparently retry once without cookies.
+            if (NeedsCookieFallback(job, result))
+            {
+                log.Write(LogLevel.Warning,
+                    $"[{Short(job)}] Browser cookie database is locked — retrying without cookies. " +
+                    "Close the browser completely to use its cookies.");
+                job.Stage = DownloadStage.Resolving;
+
+                var fallbackRequest = job.Request with
+                {
+                    Options = job.Request.EffectiveOptions with { CookiesFromBrowser = string.Empty }
+                };
+                var fallbackArguments = builder.Build(fallbackRequest, tools);
+                result = await runner.RunAsync(
+                        tools.YtDlpPath!, fallbackArguments, OnOutput, OnError, cancellationToken)
+                    .ConfigureAwait(false);
+                usedCookieFallback = true;
+            }
         }
         catch (Exception ex)
         {
@@ -106,7 +127,19 @@ public sealed class DownloadExecutor(
         }
 
         CompleteJob(job, result, alreadyDownloaded);
+
+        if (usedCookieFallback && job.Stage == DownloadStage.Completed)
+        {
+            job.StatusNote = Loc.T(LocKeys.NoteCookiesFallback);
+        }
     }
+
+    /// <summary>True when the failure is the locked-browser-cookie-DB case and cookies were in use.</summary>
+    private bool NeedsCookieFallback(DownloadJob job, ToolResult result) =>
+        !result.WasCanceled
+        && result.ExitCode != 0
+        && !string.IsNullOrWhiteSpace(job.Request.EffectiveOptions.CookiesFromBrowser)
+        && classifier.Classify(result.ExitCode, result.StdErrTail) == DownloadErrorKind.CookieBrowserLocked;
 
     private bool ValidateTools(DownloadJob job, ToolLocation tools)
     {

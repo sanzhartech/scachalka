@@ -76,6 +76,52 @@ public static class LocKeys
     public const string NoteCanceled = "Note.Canceled";
     public const string NoteCanceledBeforeStart = "Note.CanceledBeforeStart";
     public const string NoteAlreadyExisted = "Note.AlreadyExisted";
+    public const string NoteCookiesFallback = "Note.CookiesFallback";
+
+    // Apple Music library import.
+    public const string BtnImportLibrary = "Btn.ImportLibrary";
+    public const string BtnImportLibraryTooltip = "Btn.ImportLibraryTooltip";
+    public const string ImportCancel = "Import.Cancel";
+    public const string ImportFileDialogTitle = "Import.FileDialogTitle";
+    public const string ImportReading = "Import.Reading";
+    public const string ImportFoundFormat = "Import.FoundFormat";
+    public const string ImportNoSongs = "Import.NoSongs";
+    public const string ImportSearchingFormat = "Import.SearchingFormat";
+    public const string ImportMatchedFormat = "Import.MatchedFormat";
+    public const string ImportSkippedFormat = "Import.SkippedFormat";
+    public const string ImportDownloadingFormat = "Import.DownloadingFormat";
+    public const string ImportWaitingDownloads = "Import.WaitingDownloads";
+    public const string ImportDoneFormat = "Import.DoneFormat";
+    public const string ImportFailedSavedFormat = "Import.FailedSavedFormat";
+    public const string ImportCanceled = "Import.Canceled";
+    public const string ImportFailed = "Import.Failed";
+    public const string ImportAlreadyRunning = "Import.AlreadyRunning";
+    public const string ImportReasonNoMatch = "Import.ReasonNoMatch";
+    public const string ImportReasonLowConfidenceFormat = "Import.ReasonLowConfidenceFormat";
+    public const string ImportReasonDownloadFailed = "Import.ReasonDownloadFailed";
+
+    // Bulk link import.
+    public const string BtnBulkImport = "Btn.BulkImport";
+    public const string BtnBulkImportTooltip = "Btn.BulkImportTooltip";
+    public const string BulkFileDialogTitle = "Bulk.FileDialogTitle";
+    public const string BulkReading = "Bulk.Reading";
+    public const string BulkValidatingFormat = "Bulk.ValidatingFormat";
+    public const string BulkQueueingFormat = "Bulk.QueueingFormat";
+    public const string BulkStatsFormat = "Bulk.StatsFormat";
+    public const string BulkDoneFormat = "Bulk.DoneFormat";
+    public const string BulkNoLinks = "Bulk.NoLinks";
+    public const string BulkReasonInvalid = "Bulk.ReasonInvalid";
+    public const string BulkReasonUnsupportedDomain = "Bulk.ReasonUnsupportedDomain";
+    public const string BulkReasonMissing = "Bulk.ReasonMissing";
+    public const string BulkReasonDuplicate = "Bulk.ReasonDuplicate";
+
+    // Match kinds (shown as "Matched: {kind}").
+    public const string MatchOfficialMusicTrack = "Match.OfficialMusicTrack";
+    public const string MatchOfficialAudio = "Match.OfficialAudio";
+    public const string MatchOfficialMusicVideo = "Match.OfficialMusicVideo";
+    public const string MatchVevo = "Match.Vevo";
+    public const string MatchVerifiedChannel = "Match.VerifiedChannel";
+    public const string MatchHighConfidence = "Match.HighConfidence";
 
     // Error messages.
     public const string ErrorToolMissing = "Error.ToolMissing";
@@ -85,5 +131,6 @@ public static class LocKeys
     public const string ErrorPermission = "Error.Permission";
     public const string ErrorFileExists = "Error.FileExists";
     public const string ErrorInterrupted = "Error.Interrupted";
+    public const string ErrorCookieLocked = "Error.CookieLocked";
     public const string ErrorUnknown = "Error.Unknown";
 }
