@@ -2,13 +2,21 @@ using YtDlpGui.Abstractions.Localization;
 
 namespace YtDlpGui.Infrastructure.Localization;
 
-/// <summary>English string catalog (default / fallback language).</summary>
-internal static partial class StringCatalog
+public static partial class StringCatalog
 {
     public static IReadOnlyDictionary<string, string> English { get; } = new Dictionary<string, string>
     {
         [LocKeys.ToolsChecking] = "Checking for yt-dlp and FFmpeg…",
         [LocKeys.ToolsRecheck] = "Re-check tools",
+        [LocKeys.ToolsUpdate] = "Update tools",
+        [LocKeys.ToolsUpdating] = "Checking and updating components…",
+        [LocKeys.ToolsUpToDate] = "Components are up to date.",
+        [LocKeys.ToolsUpdatedFormat] = "yt-dlp updated to {0}.",
+        [LocKeys.ToolsUpdateFailedFormat] = "Failed to update components: {0}",
+        [LocKeys.ToolsNotFound] = "yt-dlp was not found on your system.",
+        [LocKeys.ToolsUpdatePermissionDenied] = "Permission denied while updating yt-dlp. Try running as administrator or updating via WinGet.",
+        [LocKeys.ToolsUpdateNetworkError] = "Network error while checking for updates. Check your connection.",
+        [LocKeys.ToolsUpdateCancelled] = "Component update was cancelled.",
         [LocKeys.ToolsReadyFormat] = "yt-dlp {0} · {1}",
         [LocKeys.ToolsMissingFormat] = "Missing: {0}. Install them (e.g. \"winget install yt-dlp.yt-dlp Gyan.FFmpeg\") or put the .exe files next to Scachalka.exe.",
         [LocKeys.ToolsMissingJoin] = " and ",
@@ -27,6 +35,7 @@ internal static partial class StringCatalog
         [LocKeys.BtnBrowse] = "Browse…",
         [LocKeys.BtnOpenFolder] = "Open folder",
         [LocKeys.CheckDarkTheme] = "Dark theme",
+        [LocKeys.CheckAutoUpdateOnStartup] = "Auto-update components on startup",
 
         [LocKeys.AdvHeader] = "Advanced yt-dlp options",
         [LocKeys.AdvPlaylists] = "Download playlists",

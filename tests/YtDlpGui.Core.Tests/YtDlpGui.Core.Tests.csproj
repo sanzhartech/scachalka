@@ -17,6 +17,7 @@
   <ItemGroup>
     <ProjectReference Include="..\..\src\YtDlpGui.Abstractions\YtDlpGui.Abstractions.csproj" />
     <ProjectReference Include="..\..\src\YtDlpGui.Core\YtDlpGui.Core.csproj" />
+    <ProjectReference Include="..\..\src\YtDlpGui.Infrastructure\YtDlpGui.Infrastructure.csproj" />
   </ItemGroup>
 
 </Project>

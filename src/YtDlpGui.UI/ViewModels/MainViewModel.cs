@@ -30,6 +30,7 @@ public sealed partial class MainViewModel : ObservableObject
     private readonly ISettingsStore _settingsStore;
     private readonly AppSettings _settings;
     private readonly IToolLocator _toolLocator;
+    private readonly IToolUpdater _toolUpdater;
     private readonly ToolContext _toolContext;
     private readonly ILogSink _log;
     private readonly IFolderService _folderService;
@@ -65,6 +66,12 @@ public sealed partial class MainViewModel : ObservableObject
 
     [ObservableProperty]
     private bool _isDarkTheme = true;
+
+    [ObservableProperty]
+    private bool _autoUpdateOnStartup = true;
+
+    [ObservableProperty]
+    private bool _isUpdatingTools;
 
     [ObservableProperty]
     private string _statusText = Loc.T(LocKeys.StatusReady);
@@ -121,6 +128,7 @@ public sealed partial class MainViewModel : ObservableObject
         ISettingsStore settingsStore,
         AppSettings settings,
         IToolLocator toolLocator,
+        IToolUpdater toolUpdater,
         ToolContext toolContext,
         ILogSink log,
         IFolderService folderService,
@@ -134,6 +142,7 @@ public sealed partial class MainViewModel : ObservableObject
         _settingsStore = settingsStore;
         _settings = settings;
         _toolLocator = toolLocator;
+        _toolUpdater = toolUpdater;
         _toolContext = toolContext;
         _log = log;
         _folderService = folderService;
@@ -171,10 +180,15 @@ public sealed partial class MainViewModel : ObservableObject
         });
     }
 
-    /// <summary>Called once after the window is shown: discovers external tools off the UI thread.</summary>
+    /// <summary>Called once after the window is shown: discovers external tools off the UI thread and optionally updates components.</summary>
     public async Task InitializeAsync()
     {
         await RefreshToolsAsync();
+
+        if (AutoUpdateOnStartup && _lastToolLocation.HasYtDlp)
+        {
+            _ = UpdateToolsInternalAsync(isAutomatic: true);
+        }
     }
 
     private void ApplySettings(AppSettings settings)
@@ -185,6 +199,7 @@ public sealed partial class MainViewModel : ObservableObject
         SelectedFormat = Formats.FirstOrDefault(f => f.Value == settings.PreferredFormat) ?? Formats[0];
         SelectedQuality = Qualities.FirstOrDefault(q => q.Value == settings.PreferredQuality) ?? Qualities[0];
         IsDarkTheme = !string.Equals(settings.Theme, ThemeManager.Light, StringComparison.OrdinalIgnoreCase);
+        AutoUpdateOnStartup = settings.AutoUpdateOnStartup;
         AllowPlaylists = settings.AllowPlaylists;
         EmbedMetadata = settings.EmbedMetadata;
         EmbedThumbnail = settings.EmbedThumbnail;
@@ -312,6 +327,7 @@ public sealed partial class MainViewModel : ObservableObject
         _settings.PreferredFormat = SelectedFormat.Value;
         _settings.PreferredQuality = SelectedQuality.Value;
         _settings.Theme = IsDarkTheme ? ThemeManager.Dark : ThemeManager.Light;
+        _settings.AutoUpdateOnStartup = AutoUpdateOnStartup;
         _settings.AllowPlaylists = AllowPlaylists;
         _settings.EmbedMetadata = EmbedMetadata;
         _settings.EmbedThumbnail = EmbedThumbnail;
@@ -358,6 +374,8 @@ public sealed partial class MainViewModel : ObservableObject
     partial void OnSelectedCookiesBrowserChanged(string value) => SaveSettingsSafe();
 
     partial void OnCustomArgumentsChanged(string value) => SaveSettingsSafe();
+
+    partial void OnAutoUpdateOnStartupChanged(bool value) => SaveSettingsSafe();
 
     partial void OnSelectedFormatChanged(FormatOption value)
     {

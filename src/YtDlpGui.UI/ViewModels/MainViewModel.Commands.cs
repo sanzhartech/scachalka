@@ -8,7 +8,7 @@ using YtDlpGui.Application.Jobs;
 
 namespace YtDlpGui.UI.ViewModels;
 
-/// <summary>Command handlers of the main window (add/paste/browse/cancel/retry/open/clear/re-check).</summary>
+/// <summary>Command handlers of the main window (add/paste/browse/cancel/retry/open/clear/re-check/update).</summary>
 public sealed partial class MainViewModel
 {
     [RelayCommand]
@@ -20,14 +20,14 @@ public sealed partial class MainViewModel
         var text = _clipboard.GetText();
         if (string.IsNullOrWhiteSpace(text))
         {
-            StatusText = "Clipboard does not contain text.";
+            StatusText = Loc.T(LocKeys.StatusClipboardNoText);
             return;
         }
 
         EnqueueFromText(text, clearInputOnSuccess: false);
     }
 
-    /// <summary>Entry point for window drag &amp; drop (called from code-behind).</summary>
+    /// <summary>Entry point for window drag & drop (called from code-behind).</summary>
     public void AddDroppedText(string text) => EnqueueFromText(text, clearInputOnSuccess: false);
 
     private void EnqueueFromText(string text, bool clearInputOnSuccess)
@@ -142,6 +142,54 @@ public sealed partial class MainViewModel
 
     [RelayCommand]
     private async Task RecheckToolsAsync() => await RefreshToolsAsync();
+
+    [RelayCommand]
+    private async Task UpdateToolsAsync() => await UpdateToolsInternalAsync(isAutomatic: false);
+
+    public async Task UpdateToolsInternalAsync(bool isAutomatic)
+    {
+        if (IsUpdatingTools)
+        {
+            return;
+        }
+
+        if (!_lastToolLocation.HasYtDlp)
+        {
+            StatusText = Loc.T(LocKeys.ToolsNotFound);
+            return;
+        }
+
+        IsUpdatingTools = true;
+        StatusText = Loc.T(LocKeys.ToolsUpdating);
+
+        try
+        {
+            var result = await _toolUpdater.UpdateAsync(_lastToolLocation, CancellationToken.None);
+
+            if (result.Status == ToolUpdateStatus.Updated)
+            {
+                StatusText = result.Message;
+                await RefreshToolsAsync();
+            }
+            else if (result.Status == ToolUpdateStatus.UpToDate)
+            {
+                StatusText = isAutomatic ? StatusText : result.Message;
+            }
+            else
+            {
+                StatusText = result.Message;
+            }
+        }
+        catch (Exception ex)
+        {
+            _log.Write(LogLevel.Error, $"Update components failed: {ex.Message}");
+            StatusText = Loc.T(LocKeys.ToolsUpdateFailedFormat, ex.Message);
+        }
+        finally
+        {
+            IsUpdatingTools = false;
+        }
+    }
 
     private async Task RefreshToolsAsync()
     {

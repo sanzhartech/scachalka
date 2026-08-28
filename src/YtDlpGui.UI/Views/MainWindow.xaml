@@ -66,12 +66,18 @@
                            TextWrapping="Wrap"
                            VerticalAlignment="Center"
                            Foreground="{DynamicResource Brush.Warning}" />
-                <Button Grid.Column="1"
-                        Content="{loc:Str Tools.Recheck}"
-                        Margin="14,0,0,0"
-                        VerticalAlignment="Center"
-                        Command="{Binding RecheckToolsCommand}"
-                        IsEnabled="{Binding IsCheckingTools, Converter={StaticResource InverseBool}}" />
+                <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
+                    <Button Content="{loc:Str Tools.Update}"
+                            Margin="14,0,0,0"
+                            VerticalAlignment="Center"
+                            Command="{Binding UpdateToolsCommand}"
+                            IsEnabled="{Binding IsUpdatingTools, Converter={StaticResource InverseBool}}" />
+                    <Button Content="{loc:Str Tools.Recheck}"
+                            Margin="8,0,0,0"
+                            VerticalAlignment="Center"
+                            Command="{Binding RecheckToolsCommand}"
+                            IsEnabled="{Binding IsCheckingTools, Converter={StaticResource InverseBool}}" />
+                </StackPanel>
             </Grid>
         </Border>
 
@@ -135,9 +141,7 @@
             </Grid>
         </Border>
 
-        <!-- Options panel. A single Grid is the direct child of the Border, so the star
-             column is bounded to the panel width — captions align above their controls,
-             the output field flexes, and Browse / Open folder always stay visible. -->
+        <!-- Options panel -->
         <Border Grid.Row="2"
                 Background="{DynamicResource Brush.Panel}"
                 CornerRadius="10"
@@ -187,11 +191,15 @@
                         Content="{loc:Str Btn.OpenFolder}"
                         Command="{Binding OpenOutputFolderCommand}" />
 
-                <!-- Language + theme, right-aligned on their own line under the controls -->
+                <!-- Auto-update + Language + theme, right-aligned on their own line under the controls -->
                 <StackPanel Grid.Row="2" Grid.ColumnSpan="5"
                             Orientation="Horizontal"
                             HorizontalAlignment="Right"
                             Margin="0,12,0,0">
+                    <CheckBox Content="{loc:Str Check.AutoUpdateOnStartup}"
+                              VerticalAlignment="Center"
+                              Margin="0,0,24,0"
+                              IsChecked="{Binding AutoUpdateOnStartup}" />
                     <TextBlock Text="{loc:Str Label.Language}"
                                Style="{StaticResource SecondaryText}"
                                FontSize="12"
@@ -327,14 +335,14 @@
         <Border Grid.Row="5"
                 Background="{DynamicResource Brush.Panel}"
                 CornerRadius="10"
-                Padding="10">
+                Padding="14,12">
             <Grid>
                 <Grid.RowDefinitions>
                     <RowDefinition Height="Auto" />
                     <RowDefinition Height="*" />
                 </Grid.RowDefinitions>
 
-                <Grid Grid.Row="0" Margin="6,2,6,10">
+                <Grid Grid.Row="0" Margin="0,0,0,10">
                     <TextBlock Text="{loc:Str Queue.Title}" FontWeight="SemiBold" FontSize="14" VerticalAlignment="Center" />
                     <Button HorizontalAlignment="Right"
                             Style="{StaticResource IconButton}"
@@ -481,7 +489,20 @@
                 CornerRadius="8"
                 Padding="12,7"
                 Margin="0,12,0,0">
-            <TextBlock Text="{Binding StatusText}" Style="{StaticResource SecondaryText}" VerticalAlignment="Center" />
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+                <TextBlock Grid.Column="0" Text="{Binding StatusText}" Style="{StaticResource SecondaryText}" VerticalAlignment="Center" />
+                <Button Grid.Column="1"
+                        Style="{StaticResource IconButton}"
+                        Content="{loc:Str Tools.Update}"
+                        Margin="12,0,0,0"
+                        VerticalAlignment="Center"
+                        Command="{Binding UpdateToolsCommand}"
+                        IsEnabled="{Binding IsUpdatingTools, Converter={StaticResource InverseBool}}" />
+            </Grid>
         </Border>
     </Grid>
 </Window>

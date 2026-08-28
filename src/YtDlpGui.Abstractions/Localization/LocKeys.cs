@@ -3,9 +3,18 @@ namespace YtDlpGui.Abstractions.Localization;
 /// <summary>Central catalog of localization keys, referenced by both C# and XAML.</summary>
 public static class LocKeys
 {
-    // Tools banner.
+    // Tools banner & updates.
     public const string ToolsChecking = "Tools.Checking";
     public const string ToolsRecheck = "Tools.Recheck";
+    public const string ToolsUpdate = "Tools.Update";
+    public const string ToolsUpdating = "Tools.Updating";
+    public const string ToolsUpToDate = "Tools.UpToDate";
+    public const string ToolsUpdatedFormat = "Tools.UpdatedFormat";
+    public const string ToolsUpdateFailedFormat = "Tools.UpdateFailedFormat";
+    public const string ToolsNotFound = "Tools.NotFound";
+    public const string ToolsUpdatePermissionDenied = "Tools.UpdatePermissionDenied";
+    public const string ToolsUpdateNetworkError = "Tools.UpdateNetworkError";
+    public const string ToolsUpdateCancelled = "Tools.UpdateCancelled";
     public const string ToolsReadyFormat = "Tools.ReadyFormat";
     public const string ToolsMissingFormat = "Tools.MissingFormat";
     public const string ToolsMissingJoin = "Tools.MissingJoin";
@@ -26,6 +35,7 @@ public static class LocKeys
     public const string BtnBrowse = "Btn.Browse";
     public const string BtnOpenFolder = "Btn.OpenFolder";
     public const string CheckDarkTheme = "Check.DarkTheme";
+    public const string CheckAutoUpdateOnStartup = "Check.AutoUpdateOnStartup";
 
     // Advanced options.
     public const string AdvHeader = "Adv.Header";

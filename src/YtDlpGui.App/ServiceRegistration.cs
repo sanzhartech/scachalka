@@ -62,6 +62,7 @@ public static class ServiceRegistration
         services.AddSingleton<ILogSink>(sp => sp.GetRequiredService<LogService>());
         services.AddSingleton<IMediaToolRunner, ProcessMediaToolRunner>();
         services.AddSingleton<IToolLocator, ToolLocator>();
+        services.AddSingleton<IToolUpdater, ToolUpdater>();
         services.AddSingleton<ISettingsStore, JsonSettingsStore>();
         services.AddSingleton<IFolderService, FolderService>();
         services.AddSingleton<IPartialFileCleaner, PartialFileCleaner>();
