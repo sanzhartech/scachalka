@@ -355,7 +355,60 @@ public sealed class ButtonCommandTests
 
         Assert.Null(folderService.LastRevealedFile);
         Assert.NotNull(folderService.LastOpenedFolder);
-        Assert.Contains("не найден", vm.StatusText, StringComparison.OrdinalIgnoreCase);
+        Assert.Equal("Файл не найден. Открыта папка сохранения.", vm.StatusText);
+    }
+
+    [Fact]
+    public void ShowJobFolderCommand_IntermediateStreamFile_ResolvesMergedFileAndReveals()
+    {
+        var tempDir = System.IO.Path.Combine(System.IO.Path.GetTempPath(), "Scachalka_Stream_" + Guid.NewGuid().ToString("N"));
+        Directory.CreateDirectory(tempDir);
+        var mergedFile = System.IO.Path.Combine(tempDir, "TestVideo.mp4");
+        File.WriteAllText(mergedFile, "dummy video");
+
+        try
+        {
+            var (vm, folderService, _, coordinator) = CreateContext();
+            var req = new DownloadRequest("https://example.com/video", MediaFormat.Mp4, VideoQuality.Best, tempDir);
+            var job = coordinator.Enqueue(req);
+            // Intermediate stream name that yt-dlp downloaded before merging
+            job.DestinationFile = System.IO.Path.Combine(tempDir, "TestVideo.f137.mp4");
+
+            vm.ShowJobFolderCommand.Execute(job);
+
+            Assert.NotNull(folderService.LastRevealedFile);
+            Assert.Equal(System.IO.Path.GetFullPath(mergedFile), folderService.LastRevealedFile);
+        }
+        finally
+        {
+            if (Directory.Exists(tempDir)) Directory.Delete(tempDir, recursive: true);
+        }
+    }
+
+    [Fact]
+    public void ShowJobFolderCommand_UnicodeAndKazakhCharacters_RevealsFullExactPath()
+    {
+        var tempDir = System.IO.Path.Combine(System.IO.Path.GetTempPath(), "Scachalka_Қазақ_" + Guid.NewGuid().ToString("N"));
+        Directory.CreateDirectory(tempDir);
+        var specialFile = System.IO.Path.Combine(tempDir, "Ән & Күй (Live) [1080p].mp4");
+        File.WriteAllText(specialFile, "dummy");
+
+        try
+        {
+            var (vm, folderService, _, coordinator) = CreateContext();
+            var req = new DownloadRequest("https://example.com/video", MediaFormat.Mp4, VideoQuality.Best, tempDir);
+            var job = coordinator.Enqueue(req);
+            job.DestinationFile = specialFile;
+
+            vm.ShowJobFolderCommand.Execute(job);
+
+            Assert.NotNull(folderService.LastRevealedFile);
+            Assert.Equal(System.IO.Path.GetFullPath(specialFile), folderService.LastRevealedFile);
+        }
+        finally
+        {
+            if (Directory.Exists(tempDir)) Directory.Delete(tempDir, recursive: true);
+        }
     }
 
     [Fact]

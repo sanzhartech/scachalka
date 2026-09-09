@@ -41,20 +41,21 @@ public sealed class YtDlpProgressParser : IProgressParser
 
         if (line.StartsWith(DestinationMarker, StringComparison.Ordinal))
         {
-            evt = YtDlpEvent.ForDestination(line[DestinationMarker.Length..].Trim());
+            evt = YtDlpEvent.ForDestination(CleanPath(line[DestinationMarker.Length..]));
             return true;
         }
 
         if (line.StartsWith(ExtractAudioDestMarker, StringComparison.Ordinal))
         {
-            evt = YtDlpEvent.ForDestination(line[ExtractAudioDestMarker.Length..].Trim());
+            evt = YtDlpEvent.ForDestination(CleanPath(line[ExtractAudioDestMarker.Length..]));
             return true;
         }
 
         // Fallback stage markers printed by yt-dlp postprocessors.
         if (line.StartsWith("[Merger]", StringComparison.Ordinal))
         {
-            evt = YtDlpEvent.ForStage(DownloadStage.Merging);
+            var path = ExtractQuotedPath(line, "Merging formats into");
+            evt = YtDlpEvent.ForStage(DownloadStage.Merging, path);
             return true;
         }
 
@@ -62,7 +63,9 @@ public sealed class YtDlpProgressParser : IProgressParser
             || line.StartsWith("[VideoConvertor]", StringComparison.Ordinal)
             || line.StartsWith("[VideoRemuxer]", StringComparison.Ordinal))
         {
-            evt = YtDlpEvent.ForStage(DownloadStage.Converting);
+            var path = ExtractQuotedPath(line, "to ")
+                       ?? ExtractQuotedPath(line, "Destination:");
+            evt = YtDlpEvent.ForStage(DownloadStage.Converting, path);
             return true;
         }
 
@@ -150,4 +153,28 @@ public sealed class YtDlpProgressParser : IProgressParser
 
     private static int? ParseInt(string value) =>
         ParseDouble(value) is { } d ? (int)Math.Round(d) : null;
+
+    private static string CleanPath(string raw) => raw.Trim().Trim('"').Trim();
+
+    private static string? ExtractQuotedPath(string line, string prefix)
+    {
+        var idx = line.IndexOf(prefix, StringComparison.Ordinal);
+        if (idx < 0)
+        {
+            return null;
+        }
+
+        var remainder = line[(idx + prefix.Length)..].Trim();
+        if (remainder.StartsWith('"'))
+        {
+            var nextQuote = remainder.IndexOf('"', 1);
+            if (nextQuote > 1)
+            {
+                return remainder[1..nextQuote].Trim();
+            }
+        }
+
+        var path = remainder.Trim('"').Trim();
+        return path.Length > 0 ? path : null;
+    }
 }

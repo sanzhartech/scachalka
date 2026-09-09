@@ -212,9 +212,37 @@ public sealed partial class MainViewModel
         if (job is null) return;
 
         var filePath = job.DestinationFile;
-        if (!string.IsNullOrWhiteSpace(filePath) && File.Exists(filePath))
+        if (!string.IsNullOrWhiteSpace(filePath))
         {
-            var fullPath = Path.GetFullPath(filePath);
+            var trimmed = filePath.Trim().Trim('"');
+            if (trimmed.StartsWith(@"\\?\", StringComparison.Ordinal))
+            {
+                trimmed = trimmed[4..];
+            }
+
+            if (!Path.IsPathRooted(trimmed))
+            {
+                trimmed = Path.Combine(job.Request.OutputFolder, trimmed);
+            }
+
+            if (File.Exists(trimmed))
+            {
+                var fullPath = Path.GetFullPath(trimmed);
+                job.DestinationFile = fullPath;
+                if (!_folderService.RevealFile(fullPath))
+                {
+                    StatusText = "Не удалось открыть файл в проводнике.";
+                }
+                return;
+            }
+        }
+
+        // Try to resolve in output folder if extension/name slightly changed during post-processing
+        var resolved = TryResolveDownloadedFile(job);
+        if (!string.IsNullOrWhiteSpace(resolved) && File.Exists(resolved))
+        {
+            var fullPath = Path.GetFullPath(resolved);
+            job.DestinationFile = fullPath;
             if (!_folderService.RevealFile(fullPath))
             {
                 StatusText = "Не удалось открыть файл в проводнике.";
@@ -242,6 +270,59 @@ public sealed partial class MainViewModel
             StatusText = "Файл и папка назначения не найдены.";
             _log.Write(LogLevel.Warning, $"Destination folder not found: {folder}");
         }
+    }
+
+    private static string? TryResolveDownloadedFile(DownloadJob job)
+    {
+        try
+        {
+            var folder = job.Request.OutputFolder;
+            if (!Directory.Exists(folder))
+            {
+                return null;
+            }
+
+            var candidate = job.DestinationFile;
+            if (!string.IsNullOrWhiteSpace(candidate))
+            {
+                var stripped = System.Text.RegularExpressions.Regex.Replace(
+                    candidate, @"\.(?:f\d+|temp|part)(\.[a-zA-Z0-9]+)$", "$1", System.Text.RegularExpressions.RegexOptions.IgnoreCase);
+                if (File.Exists(stripped))
+                {
+                    return stripped;
+                }
+
+                var baseName = Path.GetFileNameWithoutExtension(stripped);
+                baseName = System.Text.RegularExpressions.Regex.Replace(
+                    baseName, @"\.f\d+$", "", System.Text.RegularExpressions.RegexOptions.IgnoreCase);
+
+                var matches = Directory.GetFiles(folder, $"{baseName}.*", SearchOption.AllDirectories)
+                    .Where(f => !f.EndsWith(".part", StringComparison.OrdinalIgnoreCase) && !f.EndsWith(".ytdl", StringComparison.OrdinalIgnoreCase))
+                    .ToList();
+                if (matches.Count > 0)
+                {
+                    var preferredExt = "." + job.Request.Format.ToString().ToLowerInvariant();
+                    return matches.FirstOrDefault(f => f.EndsWith(preferredExt, StringComparison.OrdinalIgnoreCase)) ?? matches[0];
+                }
+            }
+
+            if (!string.IsNullOrWhiteSpace(job.Title))
+            {
+                var matches = Directory.GetFiles(folder, $"*{job.Title}*", SearchOption.AllDirectories)
+                    .Where(f => !f.EndsWith(".part", StringComparison.OrdinalIgnoreCase) && !f.EndsWith(".ytdl", StringComparison.OrdinalIgnoreCase))
+                    .ToList();
+                if (matches.Count > 0)
+                {
+                    return matches[0];
+                }
+            }
+        }
+        catch
+        {
+            // Ignore resolution errors and let caller fall back to opening folder
+        }
+
+        return null;
     }
 
     /// <summary>Delegate to launch a media file; replaceable in unit tests.</summary>

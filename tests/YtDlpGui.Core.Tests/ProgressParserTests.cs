@@ -80,12 +80,13 @@ public sealed class ProgressParserTests
     }
 
     [Fact]
-    public void TryParse_FallbackMergerMarker_SignalsMerging()
+    public void TryParse_FallbackMergerMarker_SignalsMergingAndExtractsPath()
     {
         var ok = _sut.TryParse("[Merger] Merging formats into \"C:\\x.mp4\"", out var evt);
 
         Assert.True(ok);
         Assert.Equal(DownloadStage.Merging, evt.Stage);
+        Assert.Equal(@"C:\x.mp4", evt.Path);
     }
 
     [Theory]

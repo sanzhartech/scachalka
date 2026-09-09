@@ -47,6 +47,11 @@ public sealed class FolderService(ILogSink log) : IFolderService
         try
         {
             var cleanPath = Path.GetFullPath(filePath.Trim().Trim('"'));
+            if (cleanPath.StartsWith(@"\\?\", StringComparison.Ordinal))
+            {
+                cleanPath = cleanPath[4..];
+            }
+
             if (File.Exists(cleanPath))
             {
                 return StartExplorer($"/select,\"{cleanPath}\"");
