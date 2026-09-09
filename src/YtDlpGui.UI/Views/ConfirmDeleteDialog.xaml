@@ -1,0 +1,52 @@
+<Window x:Class="YtDlpGui.UI.Views.ConfirmDeleteDialog"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Scachalka"
+        WindowStartupLocation="CenterOwner"
+        SizeToContent="WidthAndHeight"
+        ResizeMode="NoResize"
+        ShowInTaskbar="False"
+        WindowStyle="SingleBorderWindow"
+        Background="{DynamicResource Brush.Window}"
+        Foreground="{DynamicResource Brush.Text.Primary}"
+        MinWidth="340"
+        FontFamily="Segoe UI">
+    <Grid Margin="24,20,24,20">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+
+        <TextBlock x:Name="MessageText"
+                   Text="Удалить файл с компьютера?"
+                   FontSize="14"
+                   FontWeight="SemiBold"
+                   TextWrapping="Wrap"
+                   Foreground="{DynamicResource Brush.Text.Primary}"
+                   Margin="0,0,0,24" />
+
+        <StackPanel Grid.Row="1"
+                    Orientation="Horizontal"
+                    HorizontalAlignment="Right">
+            <Button x:Name="BtnDelete"
+                    Content="Удалить"
+                    IsDefault="True"
+                    Background="{DynamicResource Brush.Danger}"
+                    BorderBrush="{DynamicResource Brush.Danger}"
+                    Foreground="White"
+                    FontWeight="SemiBold"
+                    Padding="16,6"
+                    MinHeight="32"
+                    MinWidth="80"
+                    Margin="0,0,10,0"
+                    Click="OnDeleteClick" />
+            <Button x:Name="BtnCancel"
+                    Content="Отмена"
+                    IsCancel="True"
+                    Padding="16,6"
+                    MinHeight="32"
+                    MinWidth="80"
+                    Click="OnCancelClick" />
+        </StackPanel>
+    </Grid>
+</Window>

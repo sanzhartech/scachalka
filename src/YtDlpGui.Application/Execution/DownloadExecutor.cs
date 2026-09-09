@@ -209,6 +209,17 @@ public sealed class DownloadExecutor(
     {
         if (result.WasCanceled)
         {
+            if (job.IsPauseRequested)
+            {
+                job.IsPauseRequested = false;
+                job.Stage = DownloadStage.Paused;
+                job.StatusNote = Loc.T(LocKeys.StagePaused);
+                job.SpeedBytesPerSecond = null;
+                job.EtaSeconds = null;
+                log.Write(LogLevel.Info, $"[{Short(job)}] Paused.");
+                return;
+            }
+
             job.Stage = DownloadStage.Canceled;
             job.StatusNote = Loc.T(LocKeys.NoteCanceled);
             log.Write(LogLevel.Info, $"[{Short(job)}] Canceled.");

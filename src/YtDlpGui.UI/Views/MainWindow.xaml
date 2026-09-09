@@ -3,9 +3,10 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:conv="clr-namespace:YtDlpGui.UI.Converters"
         xmlns:loc="clr-namespace:YtDlpGui.UI.Localization"
+        xmlns:shell="clr-namespace:System.Windows.Shell;assembly=PresentationFramework"
         Title="Scachalka"
-        Width="980" Height="760"
-        MinWidth="780" MinHeight="600"
+        Width="1020" Height="780"
+        MinWidth="820" MinHeight="600"
         WindowStartupLocation="CenterScreen"
         Background="{DynamicResource Brush.Window}"
         UseLayoutRounding="True"
@@ -16,6 +17,13 @@
         Drop="OnWindowDrop"
         DragOver="OnWindowDragOver">
 
+    <WindowChrome.WindowChrome>
+        <WindowChrome CaptionHeight="40"
+                      ResizeBorderThickness="6"
+                      GlassFrameThickness="0"
+                      CornerRadius="0" />
+    </WindowChrome.WindowChrome>
+
     <Window.Resources>
         <conv:StageToBrushConverter x:Key="StageToBrush" />
         <conv:LogLevelToBrushConverter x:Key="LogLevelToBrush" />
@@ -24,265 +32,462 @@
     </Window.Resources>
 
     <Window.InputBindings>
-        <KeyBinding Modifiers="Control+Shift" Key="V" Command="{Binding PasteFromClipboardCommand}" />
+        <KeyBinding Modifiers="Control" Key="V" Command="{Binding PasteAndDownloadCommand}" />
     </Window.InputBindings>
 
-    <Grid Margin="16">
+    <Grid>
         <Grid.RowDefinitions>
-            <RowDefinition Height="Auto" />
-            <RowDefinition Height="Auto" />
-            <RowDefinition Height="Auto" />
-            <RowDefinition Height="Auto" />
-            <RowDefinition Height="Auto" />
+            <!-- Custom Title Bar -->
+            <RowDefinition Height="40" />
+            <!-- Main Content Area -->
             <RowDefinition Height="*" />
-            <RowDefinition Height="Auto" />
-            <RowDefinition Height="Auto" />
         </Grid.RowDefinitions>
 
-        <!-- Tools warning banner -->
-        <Border Grid.Row="0"
-                Background="{DynamicResource Brush.Card}"
-                BorderBrush="{DynamicResource Brush.Warning}"
-                BorderThickness="1"
-                CornerRadius="8"
-                Padding="14,10"
-                Margin="0,0,0,12">
-            <Border.Style>
-                <Style TargetType="Border">
-                    <Setter Property="Visibility" Value="Visible" />
-                    <Style.Triggers>
-                        <DataTrigger Binding="{Binding AreToolsReady}" Value="True">
-                            <Setter Property="Visibility" Value="Collapsed" />
-                        </DataTrigger>
-                    </Style.Triggers>
-                </Style>
-            </Border.Style>
-            <Grid>
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="*" />
-                    <ColumnDefinition Width="Auto" />
-                </Grid.ColumnDefinitions>
-                <TextBlock Text="{Binding ToolStatusText}"
-                           TextWrapping="Wrap"
-                           VerticalAlignment="Center"
-                           Foreground="{DynamicResource Brush.Warning}" />
-                <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
-                    <Button Content="{loc:Str Tools.Update}"
-                            Margin="14,0,0,0"
-                            VerticalAlignment="Center"
-                            Command="{Binding UpdateToolsCommand}"
-                            IsEnabled="{Binding IsUpdatingTools, Converter={StaticResource InverseBool}}" />
-                    <Button Content="{loc:Str Tools.Recheck}"
-                            Margin="8,0,0,0"
-                            VerticalAlignment="Center"
-                            Command="{Binding RecheckToolsCommand}"
-                            IsEnabled="{Binding IsCheckingTools, Converter={StaticResource InverseBool}}" />
-                </StackPanel>
-            </Grid>
-        </Border>
+        <!-- ========================================== -->
+        <!-- Top Custom Title Bar (Native Windows style)-->
+        <!-- ========================================== -->
+        <Grid Grid.Row="0" Background="Transparent">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="Auto" />
+            </Grid.ColumnDefinitions>
 
-        <!-- URL input -->
-        <Border Grid.Row="1"
-                Background="{DynamicResource Brush.Panel}"
-                CornerRadius="10"
-                Padding="14"
-                Margin="0,0,0,12">
-            <Grid>
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="*" />
-                    <ColumnDefinition Width="Auto" />
-                </Grid.ColumnDefinitions>
-                <Grid.RowDefinitions>
-                    <RowDefinition Height="Auto" />
-                    <RowDefinition Height="Auto" />
-                </Grid.RowDefinitions>
-
-                <TextBlock Grid.Row="0" Grid.Column="0"
-                           Text="{loc:Str Url.Hint}"
-                           Style="{StaticResource SecondaryText}"
-                           Margin="2,0,0,6" />
-
-                <TextBox Grid.Row="1" Grid.Column="0"
-                         Text="{Binding UrlInput, UpdateSourceTrigger=PropertyChanged}"
-                         AcceptsReturn="True"
-                         TextWrapping="Wrap"
-                         VerticalScrollBarVisibility="Auto"
-                         VerticalContentAlignment="Top"
-                         MinHeight="60" MaxHeight="120">
-                    <TextBox.InputBindings>
-                        <KeyBinding Modifiers="Control" Key="Return" Command="{Binding AddUrlsCommand}" />
-                    </TextBox.InputBindings>
-                </TextBox>
-
-                <StackPanel Grid.Row="1" Grid.Column="1" Margin="12,0,0,0" VerticalAlignment="Stretch">
-                    <Button Content="{loc:Str Btn.AddToQueue}"
-                            Style="{StaticResource AccentButton}"
-                            MinWidth="136" Height="34"
-                            Command="{Binding AddUrlsCommand}"
-                            ToolTip="{loc:Str Btn.AddTooltip}" />
-                    <Button Content="{loc:Str Btn.PasteAdd}"
-                            MinWidth="136" Height="34"
-                            Margin="0,8,0,0"
-                            Command="{Binding PasteFromClipboardCommand}"
-                            ToolTip="{loc:Str Btn.PasteTooltip}" />
-                    <Button Content="{loc:Str Btn.ImportLibrary}"
-                            MinWidth="136" Height="34"
-                            Margin="0,8,0,0"
-                            Command="{Binding ImportLibraryCommand}"
-                            IsEnabled="{Binding IsImporting, Converter={StaticResource InverseBool}}"
-                            ToolTip="{loc:Str Btn.ImportLibraryTooltip}" />
-                    <Button Content="{loc:Str Btn.BulkImport}"
-                            MinWidth="136" Height="34"
-                            Margin="0,8,0,0"
-                            Command="{Binding BulkImportLinksCommand}"
-                            IsEnabled="{Binding IsImporting, Converter={StaticResource InverseBool}}"
-                            ToolTip="{loc:Str Btn.BulkImportTooltip}" />
-                </StackPanel>
-            </Grid>
-        </Border>
-
-        <!-- Options panel -->
-        <Border Grid.Row="2"
-                Background="{DynamicResource Brush.Panel}"
-                CornerRadius="10"
-                Padding="14,12"
-                Margin="0,0,0,12">
-            <Grid>
-                <Grid.RowDefinitions>
-                    <RowDefinition Height="Auto" />
-                    <RowDefinition Height="Auto" />
-                    <RowDefinition Height="Auto" />
-                </Grid.RowDefinitions>
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="Auto" />
-                    <ColumnDefinition Width="Auto" />
-                    <ColumnDefinition Width="*" />
-                    <ColumnDefinition Width="Auto" />
-                    <ColumnDefinition Width="Auto" />
-                </Grid.ColumnDefinitions>
-
-                <!-- Captions -->
-                <TextBlock Grid.Row="0" Grid.Column="0" Text="{loc:Str Label.Format}" Style="{StaticResource FieldLabel}" />
-                <TextBlock Grid.Row="0" Grid.Column="1" Text="{loc:Str Label.Quality}" Style="{StaticResource FieldLabel}" />
-                <TextBlock Grid.Row="0" Grid.Column="2" Text="{loc:Str Label.OutputFolder}" Style="{StaticResource FieldLabel}" />
-
-                <!-- Controls -->
-                <ComboBox Grid.Row="1" Grid.Column="0"
-                          Width="140" Margin="0,0,12,0"
-                          ItemsSource="{Binding Formats}"
-                          SelectedItem="{Binding SelectedFormat}" />
-
-                <ComboBox Grid.Row="1" Grid.Column="1"
-                          Width="150" Margin="0,0,12,0"
-                          ItemsSource="{Binding Qualities}"
-                          SelectedItem="{Binding SelectedQuality}"
-                          IsEnabled="{Binding IsQualityEnabled}" />
-
-                <TextBox Grid.Row="1" Grid.Column="2"
-                         Margin="0,0,12,0"
-                         Text="{Binding OutputFolder, UpdateSourceTrigger=LostFocus}" />
-
-                <Button Grid.Row="1" Grid.Column="3"
-                        Content="{loc:Str Btn.Browse}"
-                        Margin="0,0,8,0"
-                        Command="{Binding BrowseFolderCommand}" />
-
-                <Button Grid.Row="1" Grid.Column="4"
-                        Content="{loc:Str Btn.OpenFolder}"
-                        Command="{Binding OpenOutputFolderCommand}" />
-
-                <!-- Auto-update + Language + theme, right-aligned on their own line under the controls -->
-                <StackPanel Grid.Row="2" Grid.ColumnSpan="5"
-                            Orientation="Horizontal"
-                            HorizontalAlignment="Right"
-                            Margin="0,12,0,0">
-                    <CheckBox Content="{loc:Str Check.AutoUpdateOnStartup}"
-                              VerticalAlignment="Center"
-                              Margin="0,0,24,0"
-                              IsChecked="{Binding AutoUpdateOnStartup}" />
-                    <TextBlock Text="{loc:Str Label.Language}"
-                               Style="{StaticResource SecondaryText}"
-                               FontSize="12"
+            <!-- Brand & Tagline -->
+            <StackPanel Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center" Margin="14,0,0,0">
+                <!-- App Icon badge -->
+                <Border Width="22" Height="22"
+                        CornerRadius="5"
+                        Background="#FF0F172A"
+                        Margin="0,0,10,0"
+                        VerticalAlignment="Center">
+                    <TextBlock Text="S"
+                               Foreground="White"
+                               FontSize="13"
+                               FontWeight="Bold"
+                               HorizontalAlignment="Center"
                                VerticalAlignment="Center"
-                               Margin="0,0,8,0" />
-                    <ComboBox Width="132"
-                              ItemsSource="{Binding Languages}"
-                              SelectedItem="{Binding SelectedLanguage}" />
-                    <CheckBox Content="{loc:Str Check.DarkTheme}"
-                              VerticalAlignment="Center"
-                              Margin="24,0,0,0"
-                              IsChecked="{Binding IsDarkTheme}" />
-                </StackPanel>
-            </Grid>
-        </Border>
+                               Margin="0,-1,0,0" />
+                </Border>
 
-        <!-- Apple Music library import progress -->
-        <Border Grid.Row="3"
-                Background="{DynamicResource Brush.Panel}"
-                CornerRadius="10"
-                Padding="14,12"
-                Margin="0,0,0,12"
-                Visibility="{Binding IsImportPanelVisible, Converter={StaticResource BoolToVisibility}}">
-            <Grid>
-                <Grid.RowDefinitions>
-                    <RowDefinition Height="Auto" />
-                    <RowDefinition Height="Auto" />
-                    <RowDefinition Height="Auto" />
-                </Grid.RowDefinitions>
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="*" />
-                    <ColumnDefinition Width="Auto" />
-                </Grid.ColumnDefinitions>
-
-                <TextBlock Grid.Row="0" Grid.Column="0"
-                           Text="{Binding ImportStatusText}"
-                           TextWrapping="Wrap"
-                           FontSize="13"
+                <TextBlock Text="Scachalka"
+                           FontWeight="SemiBold"
+                           FontSize="13.5"
+                           Foreground="{DynamicResource Brush.Text.Primary}"
                            VerticalAlignment="Center" />
 
-                <Button Grid.Row="0" Grid.Column="1"
-                        Content="{loc:Str Import.Cancel}"
-                        Margin="14,0,0,0"
-                        VerticalAlignment="Center"
-                        Command="{Binding CancelImportCommand}"
-                        Visibility="{Binding IsImporting, Converter={StaticResource BoolToVisibility}}" />
+                <TextBlock Text="Скачивайте видео и музыку легко"
+                           FontSize="12"
+                           Foreground="{DynamicResource Brush.Text.Secondary}"
+                           Margin="12,0,0,0"
+                           VerticalAlignment="Center" />
+            </StackPanel>
 
-                <TextBlock Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2"
-                           Text="{Binding ImportDetailText}"
-                           Style="{StaticResource SecondaryText}"
-                           TextWrapping="Wrap"
-                           Margin="0,6,0,0" />
+            <!-- Window Caption & Settings Buttons -->
+            <StackPanel Grid.Column="1"
+                        Orientation="Horizontal"
+                        WindowChrome.IsHitTestVisibleInChrome="True">
+                <!-- Settings Button -->
+                <Button Style="{StaticResource WindowCaptionButton}"
+                        ToolTip="{loc:Str Adv.Header}"
+                        Click="OnSettingsClick">
+                    <Path Data="{StaticResource Icon.Settings}"
+                          Fill="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}"
+                          Width="15" Height="15"
+                          Stretch="Uniform" />
+                </Button>
 
-                <ProgressBar Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="2"
-                             Height="6"
-                             Margin="0,10,0,0"
-                             Minimum="0"
-                             Maximum="{Binding ImportProgressMax}"
-                             Value="{Binding ImportProgressValue, Mode=OneWay}"
-                             Visibility="{Binding IsImporting, Converter={StaticResource BoolToVisibility}}" />
-            </Grid>
-        </Border>
+                <!-- Minimize Button -->
+                <Button Style="{StaticResource WindowCaptionButton}"
+                        Click="OnMinimizeClick">
+                    <Path Data="M 0 0 H 10"
+                          Stroke="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}"
+                          StrokeThickness="1.2"
+                          Width="10" Height="2"
+                          Stretch="None" />
+                </Button>
 
-        <!-- Advanced yt-dlp options -->
-        <Expander Grid.Row="4"
-                  Header="{loc:Str Adv.Header}"
-                  Margin="0,0,0,12"
-                  IsExpanded="False">
-            <Border Background="{DynamicResource Brush.Panel}"
-                    CornerRadius="10"
-                    Padding="14,12"
-                    Margin="0,8,0,0">
-                <StackPanel>
-                    <WrapPanel>
+                <!-- Maximize / Restore Button -->
+                <Button Style="{StaticResource WindowCaptionButton}"
+                        Click="OnMaximizeClick">
+                    <Path Data="M 0 0 H 10 V 10 H 0 Z"
+                          Stroke="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}"
+                          StrokeThickness="1.2"
+                          Width="10" Height="10"
+                          Stretch="None" />
+                </Button>
+
+                <!-- Close Button -->
+                <Button Style="{StaticResource WindowCloseButton}"
+                        Click="OnCloseClick">
+                    <Path Data="{StaticResource Icon.Close}"
+                          Fill="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}"
+                          Width="10" Height="10"
+                          Stretch="Uniform" />
+                </Button>
+            </StackPanel>
+        </Grid>
+
+        <!-- ========================================== -->
+        <!-- Main Window Content                        -->
+        <!-- ========================================== -->
+        <Grid Grid.Row="1" Margin="16,4,16,14">
+            <Grid.RowDefinitions>
+                <!-- Row 0: Tools Warning Banner (conditional) -->
+                <RowDefinition Height="Auto" />
+                <!-- Row 1: URL Input Card -->
+                <RowDefinition Height="Auto" />
+                <!-- Row 2: Parameters Card -->
+                <RowDefinition Height="Auto" />
+                <!-- Row 3: Advanced Options Card -->
+                <RowDefinition Height="Auto" />
+                <!-- Row 4: Apple Music import progress (conditional) -->
+                <RowDefinition Height="Auto" />
+                <!-- Row 5: Download Queue Card -->
+                <RowDefinition Height="*" />
+                <!-- Row 6: Bottom Status Bar -->
+                <RowDefinition Height="Auto" />
+            </Grid.RowDefinitions>
+
+            <!-- Tools Warning Banner (shown when dependencies are missing) -->
+            <Border Grid.Row="0"
+                    Background="{DynamicResource Brush.Card}"
+                    BorderBrush="{DynamicResource Brush.Warning}"
+                    BorderThickness="1"
+                    CornerRadius="8"
+                    Padding="14,10"
+                    Margin="0,0,0,10">
+                <Border.Style>
+                    <Style TargetType="Border">
+                        <Setter Property="Visibility" Value="Visible" />
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding AreToolsReady}" Value="True">
+                                <Setter Property="Visibility" Value="Collapsed" />
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </Border.Style>
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+                    <TextBlock Text="{Binding ToolStatusText}"
+                               TextWrapping="Wrap"
+                               VerticalAlignment="Center"
+                               Foreground="{DynamicResource Brush.Warning}" />
+                    <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
+                        <Button Content="{loc:Str Tools.Update}"
+                                Margin="14,0,0,0"
+                                VerticalAlignment="Center"
+                                Command="{Binding UpdateToolsCommand}"
+                                IsEnabled="{Binding IsUpdatingTools, Converter={StaticResource InverseBool}}" />
+                        <Button Content="{loc:Str Tools.Recheck}"
+                                Margin="8,0,0,0"
+                                VerticalAlignment="Center"
+                                Command="{Binding RecheckToolsCommand}"
+                                IsEnabled="{Binding IsCheckingTools, Converter={StaticResource InverseBool}}" />
+                    </StackPanel>
+                </Grid>
+            </Border>
+
+            <!-- ========================================== -->
+            <!-- CARD 1: URL INPUT BLOCK                   -->
+            <!-- ========================================== -->
+            <Border Grid.Row="1"
+                    Background="{DynamicResource Brush.Card}"
+                    BorderBrush="{DynamicResource Brush.Border}"
+                    BorderThickness="1"
+                    CornerRadius="{StaticResource Metric.CardCornerRadius}"
+                    Padding="16"
+                    Margin="0,0,0,10">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+
+                    <!-- Left: Header, Multi-line Box, Counter -->
+                    <Grid Grid.Column="0">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                        </Grid.RowDefinitions>
+
+                        <!-- Title + subtitle -->
+                        <StackPanel Grid.Row="0" Orientation="Horizontal" Margin="0,0,0,8" VerticalAlignment="Center">
+                            <Path Data="{StaticResource Icon.Link}"
+                                  Fill="{DynamicResource Brush.Accent}"
+                                  Width="16" Height="16"
+                                  Stretch="Uniform"
+                                  Margin="0,0,8,0"
+                                  VerticalAlignment="Center" />
+                            <TextBlock Text="Вставьте ссылки"
+                                       FontWeight="SemiBold"
+                                       FontSize="13.5"
+                                       Foreground="{DynamicResource Brush.Text.Primary}"
+                                       VerticalAlignment="Center" />
+                            <TextBlock Text="{loc:Str Url.Hint}"
+                                       FontSize="11.5"
+                                       Foreground="{DynamicResource Brush.Text.Secondary}"
+                                       Margin="10,0,0,0"
+                                       VerticalAlignment="Center" />
+                        </StackPanel>
+
+                        <!-- Input box with inner clear button -->
+                        <Grid Grid.Row="1">
+                            <TextBox Text="{Binding UrlInput, UpdateSourceTrigger=PropertyChanged}"
+                                     AcceptsReturn="True"
+                                     TextWrapping="Wrap"
+                                     VerticalScrollBarVisibility="Auto"
+                                     VerticalContentAlignment="Top"
+                                     Height="74"
+                                     Padding="10,8,30,8">
+                                <TextBox.InputBindings>
+                                    <KeyBinding Modifiers="Control" Key="Return" Command="{Binding PasteAndDownloadCommand}" />
+                                </TextBox.InputBindings>
+                            </TextBox>
+
+                            <!-- Clear 'x' button inside top right -->
+                            <Button Style="{StaticResource RowActionButton}"
+                                    HorizontalAlignment="Right"
+                                    VerticalAlignment="Top"
+                                    Margin="0,4,4,0"
+                                    Width="24" Height="24"
+                                    Command="{Binding ClearUrlInputCommand}"
+                                    Visibility="{Binding HasUrlInput, Converter={StaticResource BoolToVisibility}}"
+                                    ToolTip="Очистить">
+                                <Path Data="{StaticResource Icon.Close}"
+                                      Fill="{DynamicResource Brush.Text.Secondary}"
+                                      Width="9" Height="9"
+                                      Stretch="Uniform" />
+                            </Button>
+                        </Grid>
+
+                        <!-- Bottom caption under textbox -->
+                        <TextBlock Grid.Row="2"
+                                   Text="{Binding UrlCountText}"
+                                   FontSize="11.5"
+                                   Foreground="{DynamicResource Brush.Text.Secondary}"
+                                   Margin="2,6,0,0" />
+                    </Grid>
+
+                    <!-- Right: Primary & Secondary Buttons -->
+                    <StackPanel Grid.Column="1"
+                                Width="196"
+                                Margin="14,0,0,0"
+                                VerticalAlignment="Top">
+                        <!-- Primary Blue Button: 'Вставить и скачать' -->
+                        <Button Style="{StaticResource PrimaryAccentButton}"
+                                Height="48"
+                                Command="{Binding PasteAndDownloadCommand}"
+                                ToolTip="{loc:Str Btn.PasteTooltip}">
+                            <Grid HorizontalAlignment="Center" VerticalAlignment="Center">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto" />
+                                    <ColumnDefinition Width="*" />
+                                </Grid.ColumnDefinitions>
+
+                                <Path Grid.Column="0"
+                                      Data="{StaticResource Icon.Download}"
+                                      Fill="White"
+                                      Width="18" Height="18"
+                                      Stretch="Uniform"
+                                      Margin="0,0,10,0"
+                                      VerticalAlignment="Center" />
+
+                                <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                                    <TextBlock Text="{loc:Str Btn.PasteAdd}"
+                                               FontWeight="SemiBold"
+                                               FontSize="13.5"
+                                               Foreground="White" />
+                                    <TextBlock Text="Ctrl + V"
+                                               FontSize="11"
+                                               Foreground="#FFBFDBFE"
+                                               Margin="0,1,0,0" />
+                                </StackPanel>
+                            </Grid>
+                        </Button>
+
+                        <!-- Secondary White Outline Button: 'Массовый импорт ссылок' -->
+                        <Button Style="{StaticResource SecondaryOutlineButton}"
+                                Height="38"
+                                Margin="0,8,0,0"
+                                Command="{Binding BulkImportLinksCommand}"
+                                IsEnabled="{Binding IsImporting, Converter={StaticResource InverseBool}}"
+                                ToolTip="{loc:Str Btn.BulkImportTooltip}">
+                            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center">
+                                <Path Data="{StaticResource Icon.Link}"
+                                      Fill="{DynamicResource Brush.Text.Secondary}"
+                                      Width="13" Height="13"
+                                      Stretch="Uniform"
+                                      Margin="0,0,8,0"
+                                      VerticalAlignment="Center" />
+                                <TextBlock Text="{loc:Str Btn.BulkImport}"
+                                           FontSize="12.5"
+                                           FontWeight="Medium"
+                                           VerticalAlignment="Center" />
+                            </StackPanel>
+                        </Button>
+                    </StackPanel>
+                </Grid>
+            </Border>
+
+            <!-- ========================================== -->
+            <!-- CARD 2: PARAMETERS BLOCK                   -->
+            <!-- ========================================== -->
+            <Border Grid.Row="2"
+                    Background="{DynamicResource Brush.Card}"
+                    BorderBrush="{DynamicResource Brush.Border}"
+                    BorderThickness="1"
+                    CornerRadius="{StaticResource Metric.CardCornerRadius}"
+                    Padding="16,10"
+                    Margin="0,0,0,10">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <!-- 0: Format -->
+                        <ColumnDefinition Width="Auto" MinWidth="136" />
+                        <!-- 1: Quality -->
+                        <ColumnDefinition Width="Auto" MinWidth="136" />
+                        <!-- 2: Output Folder -->
+                        <ColumnDefinition Width="*" />
+                        <!-- 3: Language -->
+                        <ColumnDefinition Width="Auto" MinWidth="130" />
+                        <!-- 4: Dark Theme -->
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+
+                    <!-- Section 1: Format -->
+                    <StackPanel Grid.Column="0" Margin="0,0,14,0">
+                        <StackPanel Orientation="Horizontal" Margin="2,0,0,4">
+                            <Path Data="{StaticResource Icon.Video}"
+                                  Fill="{DynamicResource Brush.Text.Secondary}"
+                                  Width="13" Height="13"
+                                  Stretch="Uniform"
+                                  Margin="0,0,6,0"
+                                  VerticalAlignment="Center" />
+                            <TextBlock Text="{loc:Str Label.Format}"
+                                       Style="{StaticResource FieldLabel}"
+                                       Margin="0" />
+                        </StackPanel>
+                        <ComboBox ItemsSource="{Binding Formats}"
+                                  SelectedItem="{Binding SelectedFormat}"
+                                  Height="34" />
+                    </StackPanel>
+
+                    <!-- Section 2: Quality -->
+                    <StackPanel Grid.Column="1" Margin="0,0,14,0">
+                        <StackPanel Orientation="Horizontal" Margin="2,0,0,4">
+                            <Path Data="{StaticResource Icon.Equalizer}"
+                                  Fill="{DynamicResource Brush.Text.Secondary}"
+                                  Width="13" Height="13"
+                                  Stretch="Uniform"
+                                  Margin="0,0,6,0"
+                                  VerticalAlignment="Center" />
+                            <TextBlock Text="{loc:Str Label.Quality}"
+                                       Style="{StaticResource FieldLabel}"
+                                       Margin="0" />
+                        </StackPanel>
+                        <ComboBox ItemsSource="{Binding Qualities}"
+                                  SelectedItem="{Binding SelectedQuality}"
+                                  IsEnabled="{Binding IsQualityEnabled}"
+                                  Height="34" />
+                    </StackPanel>
+
+                    <!-- Section 3: Output Folder -->
+                    <StackPanel Grid.Column="2" Margin="0,0,14,0">
+                        <StackPanel Orientation="Horizontal" Margin="2,0,0,4">
+                            <Path Data="{StaticResource Icon.Folder}"
+                                  Fill="{DynamicResource Brush.Text.Secondary}"
+                                  Width="13" Height="13"
+                                  Stretch="Uniform"
+                                  Margin="0,0,6,0"
+                                  VerticalAlignment="Center" />
+                            <TextBlock Text="{loc:Str Label.OutputFolder}"
+                                       Style="{StaticResource FieldLabel}"
+                                       Margin="0" />
+                        </StackPanel>
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+
+                            <TextBox Grid.Column="0"
+                                     Text="{Binding OutputFolder, UpdateSourceTrigger=LostFocus}"
+                                     Height="34"
+                                     VerticalContentAlignment="Center" />
+
+                            <Button Grid.Column="1"
+                                    Style="{StaticResource SecondaryOutlineButton}"
+                                    Height="34"
+                                    Width="114"
+                                    Padding="10,0"
+                                    Margin="8,0,0,0"
+                                    Command="{Binding BrowseFolderCommand}"
+                                    ToolTip="{loc:Str Btn.Browse}">
+                                <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center">
+                                    <Path Data="{StaticResource Icon.Folder}"
+                                          Fill="{DynamicResource Brush.Text.Secondary}"
+                                          Width="13" Height="13"
+                                          Stretch="Uniform"
+                                          Margin="0,0,6,0"
+                                          VerticalAlignment="Center" />
+                                    <TextBlock Text="{loc:Str Btn.Browse}"
+                                               FontSize="12"
+                                               FontWeight="Medium"
+                                               VerticalAlignment="Center" />
+                                </StackPanel>
+                            </Button>
+                        </Grid>
+                    </StackPanel>
+
+                    <!-- Section 4: Language -->
+                    <StackPanel Grid.Column="3" Margin="0,0,14,0">
+                        <StackPanel Orientation="Horizontal" Margin="2,0,0,4">
+                            <Path Data="{StaticResource Icon.Globe}"
+                                  Fill="{DynamicResource Brush.Text.Secondary}"
+                                  Width="13" Height="13"
+                                  Stretch="Uniform"
+                                  Margin="0,0,6,0"
+                                  VerticalAlignment="Center" />
+                            <TextBlock Text="{loc:Str Label.Language}"
+                                       Style="{StaticResource FieldLabel}"
+                                       Margin="0" />
+                        </StackPanel>
+                        <ComboBox ItemsSource="{Binding Languages}"
+                                  SelectedItem="{Binding SelectedLanguage}"
+                                  Height="34" />
+                    </StackPanel>
+
+                    <!-- Section 5: Dark Theme Toggle -->
+                    <CheckBox Grid.Column="4"
+                              Content="{loc:Str Check.DarkTheme}"
+                              IsChecked="{Binding IsDarkTheme}"
+                              VerticalAlignment="Center"
+                              Margin="6,18,0,0" />
+                </Grid>
+            </Border>
+
+            <!-- ========================================== -->
+            <!-- CARD 3: ADVANCED YT-DLP OPTIONS (EXPANDER) -->
+            <!-- ========================================== -->
+            <Expander Grid.Row="3"
+                      Style="{StaticResource CardExpander}"
+                      Header="{loc:Str Adv.Header}"
+                      IsExpanded="{Binding IsAdvOptionsExpanded}"
+                      Margin="0,0,0,10">
+                <StackPanel Margin="2,0,0,0">
+                    <WrapPanel Margin="0,0,0,10">
                         <CheckBox Content="{loc:Str Adv.Playlists}"
-                                  Margin="0,0,20,8"
+                                  Margin="0,0,24,8"
                                   IsChecked="{Binding AllowPlaylists}"
                                   ToolTip="{loc:Str Adv.PlaylistsTip}" />
                         <CheckBox Content="{loc:Str Adv.Metadata}"
-                                  Margin="0,0,20,8"
+                                  Margin="0,0,24,8"
                                   IsChecked="{Binding EmbedMetadata}" />
                         <CheckBox Content="{loc:Str Adv.Thumbnail}"
-                                  Margin="0,0,20,8"
+                                  Margin="0,0,24,8"
                                   IsChecked="{Binding EmbedThumbnail}"
                                   ToolTip="{loc:Str Adv.ThumbnailTip}" />
                         <StackPanel Orientation="Horizontal" Margin="0,0,0,8" VerticalAlignment="Center">
@@ -293,15 +498,17 @@
                                       IsEnabled="{Binding IsSubtitleOptionEnabled}"
                                       ToolTip="{loc:Str Adv.SubtitlesTip}" />
                             <TextBox Width="128"
+                                     Height="28"
                                      VerticalAlignment="Center"
                                      Text="{Binding SubtitleLanguages, UpdateSourceTrigger=LostFocus}"
                                      IsEnabled="{Binding IsSubtitleOptionEnabled}"
                                      ToolTip="{loc:Str Adv.SubLangsTip}" />
                         </StackPanel>
                     </WrapPanel>
-                    <Grid Margin="0,8,0,0">
+
+                    <Grid>
                         <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="Auto" MinWidth="180" />
                             <ColumnDefinition Width="*" />
                         </Grid.ColumnDefinitions>
                         <Grid.RowDefinitions>
@@ -316,193 +523,574 @@
                         <TextBlock Grid.Row="0" Grid.Column="1"
                                    Text="{loc:Str Adv.ExtraArgs}"
                                    Style="{StaticResource FieldLabel}"
-                                   Margin="14,0,0,5" />
+                                   Margin="14,0,0,4" />
 
                         <ComboBox Grid.Row="1" Grid.Column="0"
-                                  Width="150" Margin="0,0,14,0"
+                                  Height="32"
+                                  Margin="0,0,14,0"
                                   ItemsSource="{Binding CookieBrowsers}"
                                   SelectedItem="{Binding SelectedCookiesBrowser}" />
                         <TextBox Grid.Row="1" Grid.Column="1"
+                                 Height="32"
                                  Text="{Binding CustomArguments, UpdateSourceTrigger=LostFocus}"
                                  FontFamily="Cascadia Mono, Consolas"
                                  ToolTip="{loc:Str Adv.ExtraArgsTip}" />
                     </Grid>
                 </StackPanel>
-            </Border>
-        </Expander>
+            </Expander>
 
-        <!-- Download queue -->
-        <Border Grid.Row="5"
-                Background="{DynamicResource Brush.Panel}"
-                CornerRadius="10"
-                Padding="14,12">
-            <Grid>
-                <Grid.RowDefinitions>
-                    <RowDefinition Height="Auto" />
-                    <RowDefinition Height="*" />
-                </Grid.RowDefinitions>
+            <!-- Apple Music library import progress (shown only when importing) -->
+            <Border Grid.Row="4"
+                    Background="{DynamicResource Brush.Card}"
+                    BorderBrush="{DynamicResource Brush.Border}"
+                    BorderThickness="1"
+                    CornerRadius="{StaticResource Metric.CardCornerRadius}"
+                    Padding="14,10"
+                    Margin="0,0,0,10"
+                    Visibility="{Binding IsImportPanelVisible, Converter={StaticResource BoolToVisibility}}">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                    </Grid.RowDefinitions>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
 
-                <Grid Grid.Row="0" Margin="0,0,0,10">
-                    <TextBlock Text="{loc:Str Queue.Title}" FontWeight="SemiBold" FontSize="14" VerticalAlignment="Center" />
-                    <Button HorizontalAlignment="Right"
-                            Style="{StaticResource IconButton}"
-                            Content="{loc:Str Queue.ClearFinished}"
-                            Command="{Binding ClearFinishedCommand}" />
+                    <TextBlock Grid.Row="0" Grid.Column="0"
+                               Text="{Binding ImportStatusText}"
+                               TextWrapping="Wrap"
+                               FontSize="13"
+                               FontWeight="SemiBold"
+                               VerticalAlignment="Center" />
+
+                    <Button Grid.Row="0" Grid.Column="1"
+                            Content="{loc:Str Import.Cancel}"
+                            Margin="14,0,0,0"
+                            VerticalAlignment="Center"
+                            Command="{Binding CancelImportCommand}"
+                            Visibility="{Binding IsImporting, Converter={StaticResource BoolToVisibility}}" />
+
+                    <TextBlock Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2"
+                               Text="{Binding ImportDetailText}"
+                               Style="{StaticResource SecondaryText}"
+                               TextWrapping="Wrap"
+                               Margin="0,4,0,0" />
+
+                    <ProgressBar Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="2"
+                                 Height="6"
+                                 Margin="0,8,0,0"
+                                 Minimum="0"
+                                 Maximum="{Binding ImportProgressMax}"
+                                 Value="{Binding ImportProgressValue, Mode=OneWay}"
+                                 Visibility="{Binding IsImporting, Converter={StaticResource BoolToVisibility}}" />
                 </Grid>
+            </Border>
 
-                <ListBox Grid.Row="1"
-                         ItemsSource="{Binding Jobs}"
-                         ItemContainerStyle="{StaticResource PlainListBoxItem}">
-                    <ListBox.ItemTemplate>
-                        <DataTemplate>
-                            <Border Background="{DynamicResource Brush.Card}"
-                                    BorderBrush="{DynamicResource Brush.Border}"
-                                    BorderThickness="1"
-                                    CornerRadius="8"
-                                    Padding="14,11"
-                                    Margin="4,4">
-                                <Grid>
-                                    <Grid.RowDefinitions>
-                                        <RowDefinition Height="Auto" />
-                                        <RowDefinition Height="Auto" />
-                                        <RowDefinition Height="Auto" />
-                                        <RowDefinition Height="Auto" />
-                                    </Grid.RowDefinitions>
-                                    <Grid.ColumnDefinitions>
-                                        <ColumnDefinition Width="*" />
-                                        <ColumnDefinition Width="Auto" />
-                                    </Grid.ColumnDefinitions>
+            <!-- ========================================== -->
+            <!-- CARD 4: DOWNLOADS QUEUE                    -->
+            <!-- ========================================== -->
+            <Border Grid.Row="5"
+                    Background="{DynamicResource Brush.Card}"
+                    BorderBrush="{DynamicResource Brush.Border}"
+                    BorderThickness="1"
+                    CornerRadius="{StaticResource Metric.CardCornerRadius}"
+                    Padding="16,12">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <!-- Header -->
+                        <RowDefinition Height="Auto" />
+                        <!-- List -->
+                        <RowDefinition Height="*" />
+                    </Grid.RowDefinitions>
 
-                                    <!-- Title + stage chip + actions -->
-                                    <StackPanel Grid.Row="0" Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center">
-                                        <Border Background="{Binding Stage, Converter={StaticResource StageToBrush}}"
-                                                CornerRadius="10"
-                                                Padding="9,3"
-                                                VerticalAlignment="Center">
-                                            <TextBlock Text="{Binding StageText}"
-                                                       Foreground="White"
-                                                       FontSize="11"
-                                                       FontWeight="SemiBold" />
-                                        </Border>
-                                        <TextBlock Text="{Binding FormatText}"
-                                                   Style="{StaticResource SecondaryText}"
-                                                   VerticalAlignment="Center"
-                                                   Margin="10,0,0,0" />
-                                    </StackPanel>
+                    <!-- Queue Card Header -->
+                    <Grid Grid.Row="0" Margin="0,0,0,10">
+                        <!-- Left: Queue title with count -->
+                        <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                            <Path Data="{StaticResource Icon.Queue}"
+                                  Fill="{DynamicResource Brush.Text.Secondary}"
+                                  Width="15" Height="15"
+                                  Stretch="Uniform"
+                                  Margin="0,0,8,0"
+                                  VerticalAlignment="Center" />
+                            <TextBlock Text="{Binding QueueTitle}"
+                                       FontWeight="SemiBold"
+                                       FontSize="13.5"
+                                       Foreground="{DynamicResource Brush.Text.Primary}"
+                                       VerticalAlignment="Center" />
+                        </StackPanel>
 
-                                    <StackPanel Grid.Row="0" Grid.Column="1" Orientation="Horizontal">
-                                        <Button Style="{StaticResource IconButton}"
-                                                Content="{loc:Str Job.Cancel}"
-                                                Visibility="{Binding CanCancel, Converter={StaticResource BoolToVisibility}}"
-                                                Command="{Binding DataContext.CancelJobCommand, RelativeSource={RelativeSource AncestorType=Window}}"
-                                                CommandParameter="{Binding}" />
-                                        <Button Style="{StaticResource IconButton}"
-                                                Content="{loc:Str Job.Retry}"
-                                                Margin="8,0,0,0"
-                                                Visibility="{Binding CanRetry, Converter={StaticResource BoolToVisibility}}"
-                                                Command="{Binding DataContext.RetryJobCommand, RelativeSource={RelativeSource AncestorType=Window}}"
-                                                CommandParameter="{Binding}" />
-                                        <Button Style="{StaticResource IconButton}"
-                                                Content="{loc:Str Job.ShowInFolder}"
-                                                Margin="8,0,0,0"
-                                                Command="{Binding DataContext.OpenJobLocationCommand, RelativeSource={RelativeSource AncestorType=Window}}"
-                                                CommandParameter="{Binding}" />
-                                    </StackPanel>
+                        <!-- Right: Actions -->
+                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center">
+                            <!-- Clear Finished Button -->
+                            <Button Style="{StaticResource SecondaryOutlineButton}"
+                                    Height="30"
+                                    Padding="10,0"
+                                    Margin="0,0,8,0"
+                                    Command="{Binding ClearFinishedCommand}">
+                                <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                    <Path Data="{StaticResource Icon.Trash}"
+                                          Fill="{DynamicResource Brush.Text.Secondary}"
+                                          Width="12" Height="12"
+                                          Stretch="Uniform"
+                                          Margin="0,0,6,0"
+                                          VerticalAlignment="Center" />
+                                    <TextBlock Text="{loc:Str Queue.ClearFinished}"
+                                               FontSize="11.5"
+                                               VerticalAlignment="Center" />
+                                </StackPanel>
+                            </Button>
 
-                                    <TextBlock Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2"
-                                               Text="{Binding DisplayName}"
-                                               ToolTip="{Binding Url}"
-                                               TextTrimming="CharacterEllipsis"
-                                               FontSize="13"
-                                               Margin="0,9,0,9" />
+                            <!-- Open Folder Button -->
+                            <Button Style="{StaticResource SecondaryOutlineButton}"
+                                    Height="30"
+                                    Padding="10,0"
+                                    Command="{Binding OpenOutputFolderCommand}">
+                                <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                    <Path Data="{StaticResource Icon.Folder}"
+                                          Fill="{DynamicResource Brush.Text.Secondary}"
+                                          Width="12" Height="12"
+                                          Stretch="Uniform"
+                                          Margin="0,0,6,0"
+                                          VerticalAlignment="Center" />
+                                    <TextBlock Text="{loc:Str Btn.OpenFolder}"
+                                               FontSize="11.5"
+                                               VerticalAlignment="Center" />
+                                </StackPanel>
+                            </Button>
+                        </StackPanel>
+                    </Grid>
 
-                                    <!-- Progress + numbers -->
-                                    <Grid Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="2">
+                    <!-- Downloads List -->
+                    <ListBox Grid.Row="1"
+                             ItemsSource="{Binding Jobs}"
+                             ItemContainerStyle="{StaticResource PlainListBoxItem}"
+                             ScrollViewer.HorizontalScrollBarVisibility="Disabled">
+                        <ListBox.ItemTemplate>
+                            <DataTemplate>
+                                <Border Background="{DynamicResource Brush.Card}"
+                                        BorderBrush="{DynamicResource Brush.Hover}"
+                                        BorderThickness="0,0,0,1"
+                                        Padding="4,8"
+                                        SnapsToDevicePixels="True">
+                                    <Grid>
                                         <Grid.ColumnDefinitions>
-                                            <ColumnDefinition Width="*" />
+                                            <!-- Col 0: Thumbnail -->
+                                            <ColumnDefinition Width="Auto" />
+                                            <!-- Col 1: Title & Format/Quality -->
+                                            <ColumnDefinition Width="2.2*" />
+                                            <!-- Col 2: Progress & Stats -->
+                                            <ColumnDefinition Width="2.8*" />
+                                            <!-- Col 3: Status badge -->
+                                            <ColumnDefinition Width="Auto" MinWidth="80" />
+                                            <!-- Col 4: Action buttons -->
                                             <ColumnDefinition Width="Auto" />
                                         </Grid.ColumnDefinitions>
 
-                                        <ProgressBar Grid.Column="0"
-                                                     VerticalAlignment="Center"
-                                                     Minimum="0" Maximum="100"
-                                                     Value="{Binding Percent, Mode=OneWay, TargetNullValue=0}"
-                                                     IsIndeterminate="{Binding IsIndeterminate}" />
+                                        <!-- Col 0: Thumbnail -->
+                                        <Border Grid.Column="0"
+                                                Width="46" Height="46"
+                                                CornerRadius="6"
+                                                Background="#FF1E293B"
+                                                ClipToBounds="True"
+                                                VerticalAlignment="Center">
+                                            <Grid>
+                                                <!-- Dark placeholder with icon -->
+                                                <Grid Background="#FF1E293B">
+                                                    <Path Data="{StaticResource Icon.Play}"
+                                                          Fill="#FF475569"
+                                                          Width="14" Height="14"
+                                                          Stretch="Uniform"
+                                                          HorizontalAlignment="Center"
+                                                          VerticalAlignment="Center" />
+                                                </Grid>
+                                                <!-- Online loaded thumbnail if available -->
+                                                <Image Source="{Binding ThumbnailUrl}"
+                                                       Stretch="UniformToFill"
+                                                       RenderOptions.BitmapScalingMode="HighQuality" />
+                                            </Grid>
+                                        </Border>
 
-                                        <StackPanel Grid.Column="1" Orientation="Horizontal" Margin="14,0,0,0">
-                                            <TextBlock Text="{Binding SizeText}" Style="{StaticResource SecondaryText}" VerticalAlignment="Center" />
-                                            <TextBlock Text="  ·  " Style="{StaticResource SecondaryText}" VerticalAlignment="Center" />
-                                            <TextBlock Text="{Binding SpeedText}" Style="{StaticResource SecondaryText}" VerticalAlignment="Center" />
-                                            <TextBlock Text="  ·  " Style="{StaticResource SecondaryText}" VerticalAlignment="Center" />
-                                            <TextBlock Text="{loc:Str Job.EtaPrefix}" Style="{StaticResource SecondaryText}" VerticalAlignment="Center" />
-                                            <TextBlock Text=" " Style="{StaticResource SecondaryText}" VerticalAlignment="Center" />
-                                            <TextBlock Text="{Binding EtaText}" Style="{StaticResource SecondaryText}" VerticalAlignment="Center" />
+                                        <!-- Col 1: Title & Format/Quality -->
+                                        <StackPanel Grid.Column="1"
+                                                    VerticalAlignment="Center"
+                                                    Margin="12,0,12,0">
+                                            <TextBlock Text="{Binding DisplayName}"
+                                                       ToolTip="{Binding Url}"
+                                                       TextTrimming="CharacterEllipsis"
+                                                       FontWeight="SemiBold"
+                                                       FontSize="13"
+                                                       Foreground="{DynamicResource Brush.Text.Primary}" />
+                                            <TextBlock Text="{Binding FormatText}"
+                                                       FontSize="11.5"
+                                                       Foreground="{DynamicResource Brush.Text.Secondary}"
+                                                       Margin="0,3,0,0" />
+                                        </StackPanel>
+
+                                        <!-- Col 2: Progress bar, percent & stats -->
+                                        <Grid Grid.Column="2" VerticalAlignment="Center" Margin="0,0,12,0">
+                                            <Grid.RowDefinitions>
+                                                <RowDefinition Height="Auto" />
+                                                <RowDefinition Height="Auto" />
+                                            </Grid.RowDefinitions>
+
+                                            <!-- Progress bar -->
+                                            <ProgressBar x:Name="JobProgressBar"
+                                                         Grid.Row="0"
+                                                         Height="5"
+                                                         Minimum="0" Maximum="100"
+                                                         Value="{Binding Percent, Mode=OneWay, TargetNullValue=0}"
+                                                         IsIndeterminate="{Binding IsIndeterminate}" />
+
+                                            <!-- Progress Numbers -->
+                                            <Grid Grid.Row="1" Margin="0,4,0,0">
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="Auto" />
+                                                    <ColumnDefinition Width="*" />
+                                                </Grid.ColumnDefinitions>
+
+                                                <!-- Percent -->
+                                                <TextBlock x:Name="PercentText"
+                                                           Grid.Column="0"
+                                                           Text="{Binding Percent, StringFormat='{}{0:0}%'}"
+                                                           FontSize="11.5"
+                                                           FontWeight="SemiBold"
+                                                           Foreground="{DynamicResource Brush.Text.Primary}" />
+
+                                                <!-- Size & ETA -->
+                                                <StackPanel x:Name="StatsPanel"
+                                                            Grid.Column="1"
+                                                            Orientation="Horizontal"
+                                                            HorizontalAlignment="Right">
+                                                    <TextBlock Text="{Binding SizeText}"
+                                                               FontSize="11"
+                                                               Foreground="{DynamicResource Brush.Text.Secondary}" />
+                                                    <TextBlock x:Name="EtaTextDisplay"
+                                                               Text="{Binding EtaText, StringFormat='{}  ·  Осталось {0}'}"
+                                                               FontSize="11"
+                                                               Foreground="{DynamicResource Brush.Text.Secondary}" />
+                                                </StackPanel>
+                                            </Grid>
+                                        </Grid>
+
+                                        <!-- Col 3: Status badge (Ready, Queued, Failed) -->
+                                        <StackPanel Grid.Column="3"
+                                                    Orientation="Horizontal"
+                                                    VerticalAlignment="Center"
+                                                    Margin="4,0,12,0">
+                                            <!-- Completed checkmark badge -->
+                                            <StackPanel x:Name="CompletedBadge"
+                                                        Orientation="Horizontal"
+                                                        VerticalAlignment="Center"
+                                                        Visibility="Collapsed">
+                                                <Path Data="{StaticResource Icon.CheckCircle}"
+                                                      Fill="{DynamicResource Brush.Success}"
+                                                      Width="15" Height="15"
+                                                      Stretch="Uniform"
+                                                      Margin="0,0,6,0"
+                                                      VerticalAlignment="Center" />
+                                                <TextBlock Text="{loc:Str Stage.Completed}"
+                                                           Foreground="{DynamicResource Brush.Success}"
+                                                           FontWeight="SemiBold"
+                                                           FontSize="12"
+                                                           VerticalAlignment="Center" />
+                                            </StackPanel>
+
+                                            <!-- Queued status text -->
+                                            <TextBlock x:Name="QueuedText"
+                                                       Text="{loc:Str Stage.Queued}"
+                                                       Foreground="{DynamicResource Brush.Text.Secondary}"
+                                                       FontSize="12"
+                                                       VerticalAlignment="Center"
+                                                       Visibility="Collapsed" />
+
+                                            <!-- Paused status text -->
+                                            <TextBlock x:Name="PausedText"
+                                                       Text="{loc:Str Stage.Paused}"
+                                                       Foreground="{DynamicResource Brush.Warning}"
+                                                       FontWeight="SemiBold"
+                                                       FontSize="12"
+                                                       VerticalAlignment="Center"
+                                                       Visibility="Collapsed" />
+
+                                            <!-- Failed status text -->
+                                            <TextBlock x:Name="FailedText"
+                                                       Text="{loc:Str Stage.Failed}"
+                                                       Foreground="{DynamicResource Brush.Danger}"
+                                                       FontWeight="SemiBold"
+                                                       FontSize="12"
+                                                       ToolTip="{Binding ErrorMessage}"
+                                                       VerticalAlignment="Center"
+                                                       Visibility="Collapsed" />
+                                        </StackPanel>
+
+                                        <!-- Col 4: Action buttons -->
+                                        <StackPanel Grid.Column="4"
+                                                    Orientation="Horizontal"
+                                                    VerticalAlignment="Center">
+                                            <!-- Play Button (Completed) -->
+                                            <Button x:Name="BtnPlay"
+                                                    Style="{StaticResource RowActionButton}"
+                                                    ToolTip="Открыть файл"
+                                                    Command="{Binding DataContext.PlayJobFileCommand, RelativeSource={RelativeSource AncestorType=Window}}"
+                                                    CommandParameter="{Binding}"
+                                                    Visibility="Collapsed">
+                                                <Path Data="{StaticResource Icon.Play}"
+                                                      Fill="{DynamicResource Brush.Text.Primary}"
+                                                      Width="11" Height="11"
+                                                      Stretch="Uniform" />
+                                            </Button>
+
+                                            <!-- Folder Button (Completed) -->
+                                            <Button x:Name="BtnFolder"
+                                                    Style="{StaticResource RowActionButton}"
+                                                    ToolTip="{loc:Str Job.ShowInFolder}"
+                                                    Command="{Binding DataContext.OpenJobLocationCommand, RelativeSource={RelativeSource AncestorType=Window}}"
+                                                    CommandParameter="{Binding}"
+                                                    Visibility="Collapsed">
+                                                <Path Data="{StaticResource Icon.Folder}"
+                                                      Fill="{DynamicResource Brush.Text.Primary}"
+                                                      Width="13" Height="13"
+                                                      Stretch="Uniform" />
+                                            </Button>
+
+                                            <!-- Pause Button (Active) -->
+                                            <Button x:Name="BtnPause"
+                                                    Style="{StaticResource RowActionButton}"
+                                                    ToolTip="{loc:Str Job.Pause}"
+                                                    Command="{Binding DataContext.PauseJobCommand, RelativeSource={RelativeSource AncestorType=Window}}"
+                                                    CommandParameter="{Binding}"
+                                                    Visibility="Collapsed">
+                                                <Path Data="{StaticResource Icon.Pause}"
+                                                      Fill="{DynamicResource Brush.Text.Primary}"
+                                                      Width="11" Height="11"
+                                                      Stretch="Uniform" />
+                                            </Button>
+
+                                            <!-- Resume Button (Paused) -->
+                                            <Button x:Name="BtnResume"
+                                                    Style="{StaticResource RowActionButton}"
+                                                    ToolTip="{loc:Str Job.Resume}"
+                                                    Command="{Binding DataContext.ResumeJobCommand, RelativeSource={RelativeSource AncestorType=Window}}"
+                                                    CommandParameter="{Binding}"
+                                                    Visibility="Collapsed">
+                                                <Path Data="{StaticResource Icon.Play}"
+                                                      Fill="{DynamicResource Brush.Text.Primary}"
+                                                      Width="11" Height="11"
+                                                      Stretch="Uniform" />
+                                            </Button>
+
+                                            <!-- Stop Button (Active / Paused) -->
+                                            <Button x:Name="BtnStop"
+                                                    Style="{StaticResource RowActionButton}"
+                                                    ToolTip="Остановить"
+                                                    Command="{Binding DataContext.StopJobCommand, RelativeSource={RelativeSource AncestorType=Window}}"
+                                                    CommandParameter="{Binding}"
+                                                    Visibility="Collapsed">
+                                                <Path Data="{StaticResource Icon.Stop}"
+                                                      Fill="{DynamicResource Brush.Text.Primary}"
+                                                      Width="11" Height="11"
+                                                      Stretch="Uniform" />
+                                            </Button>
+
+                                            <!-- Cancel / Delete Button (Queued) -->
+                                            <Button x:Name="BtnCancelQueued"
+                                                    Style="{StaticResource RowActionButton}"
+                                                    ToolTip="{loc:Str Job.Cancel}"
+                                                    Command="{Binding DataContext.CancelJobCommand, RelativeSource={RelativeSource AncestorType=Window}}"
+                                                    CommandParameter="{Binding}"
+                                                    Visibility="Collapsed">
+                                                <Path Data="{StaticResource Icon.Close}"
+                                                      Fill="{DynamicResource Brush.Text.Secondary}"
+                                                      Width="11" Height="11"
+                                                      Stretch="Uniform" />
+                                            </Button>
+
+                                            <!-- Move Up Button (Queued) -->
+                                            <Button x:Name="BtnMoveUp"
+                                                    Style="{StaticResource RowActionButton}"
+                                                    ToolTip="Поднять выше"
+                                                    Command="{Binding DataContext.MoveJobUpCommand, RelativeSource={RelativeSource AncestorType=Window}}"
+                                                    CommandParameter="{Binding}"
+                                                    Visibility="Collapsed">
+                                                <Path Data="{StaticResource Icon.ArrowUp}"
+                                                      Fill="{DynamicResource Brush.Text.Secondary}"
+                                                      Width="11" Height="11"
+                                                      Stretch="Uniform" />
+                                            </Button>
+
+                                            <!-- Move Down Button (Queued) -->
+                                            <Button x:Name="BtnMoveDown"
+                                                    Style="{StaticResource RowActionButton}"
+                                                    ToolTip="Опустить ниже"
+                                                    Command="{Binding DataContext.MoveJobDownCommand, RelativeSource={RelativeSource AncestorType=Window}}"
+                                                    CommandParameter="{Binding}"
+                                                    Visibility="Collapsed">
+                                                <Path Data="{StaticResource Icon.ArrowDown}"
+                                                      Fill="{DynamicResource Brush.Text.Secondary}"
+                                                      Width="11" Height="11"
+                                                      Stretch="Uniform" />
+                                            </Button>
+
+                                            <!-- Three Dots Context Menu Button -->
+                                            <Button x:Name="BtnDots"
+                                                    Style="{StaticResource RowActionButton}"
+                                                    ToolTip="Действия"
+                                                    Tag="{Binding DataContext, RelativeSource={RelativeSource AncestorType=Window}}"
+                                                    Click="OnJobDotsClick">
+                                                <Path Data="{StaticResource Icon.Dots}"
+                                                      Fill="{DynamicResource Brush.Text.Secondary}"
+                                                      Width="12" Height="12"
+                                                      Stretch="Uniform" />
+                                                <Button.ContextMenu>
+                                                    <ContextMenu>
+                                                        <MenuItem Header="📋  Копировать ссылку"
+                                                                  Command="{Binding PlacementTarget.Tag.CopyJobUrlCommand, RelativeSource={RelativeSource AncestorType=ContextMenu}}"
+                                                                  CommandParameter="{Binding PlacementTarget.DataContext, RelativeSource={RelativeSource AncestorType=ContextMenu}}" />
+                                                        <MenuItem Header="🗑  Удалить из списка"
+                                                                  Command="{Binding PlacementTarget.Tag.DeleteJobCommand, RelativeSource={RelativeSource AncestorType=ContextMenu}}"
+                                                                  CommandParameter="{Binding PlacementTarget.DataContext, RelativeSource={RelativeSource AncestorType=ContextMenu}}" />
+                                                        <MenuItem Header="🗑  Удалить файл"
+                                                                  Command="{Binding PlacementTarget.Tag.DeleteJobFileCommand, RelativeSource={RelativeSource AncestorType=ContextMenu}}"
+                                                                  CommandParameter="{Binding PlacementTarget.DataContext, RelativeSource={RelativeSource AncestorType=ContextMenu}}" />
+                                                    </ContextMenu>
+                                                </Button.ContextMenu>
+                                            </Button>
                                         </StackPanel>
                                     </Grid>
+                                </Border>
 
-                                    <!-- Error / note line -->
-                                    <TextBlock Grid.Row="3" Grid.Column="0" Grid.ColumnSpan="2"
-                                               Text="{Binding ErrorMessage}"
-                                               Foreground="{DynamicResource Brush.Danger}"
-                                               TextWrapping="Wrap"
-                                               FontSize="11"
-                                               Margin="0,7,0,0"
-                                               Visibility="{Binding HasError, Converter={StaticResource BoolToVisibility}}" />
-                                </Grid>
-                            </Border>
-                        </DataTemplate>
-                    </ListBox.ItemTemplate>
-                </ListBox>
-            </Grid>
-        </Border>
+                                <!-- State-based DataTemplate Triggers -->
+                                <DataTemplate.Triggers>
+                                    <!-- Completed state -->
+                                    <DataTrigger Binding="{Binding Stage}" Value="Completed">
+                                        <Setter TargetName="CompletedBadge" Property="Visibility" Value="Visible" />
+                                        <Setter TargetName="BtnPlay" Property="Visibility" Value="Visible" />
+                                        <Setter TargetName="BtnFolder" Property="Visibility" Value="Visible" />
+                                        <Setter TargetName="JobProgressBar" Property="Value" Value="100" />
+                                        <Setter TargetName="PercentText" Property="Text" Value="100%" />
+                                        <Setter TargetName="EtaTextDisplay" Property="Visibility" Value="Collapsed" />
+                                    </DataTrigger>
 
-        <!-- Log window -->
-        <Expander Grid.Row="6"
-                  Header="{loc:Str Log.Header}"
-                  Margin="0,12,0,0"
-                  IsExpanded="False">
-            <Border Background="{DynamicResource Brush.Panel}"
-                    CornerRadius="10"
-                    Padding="8"
-                    Margin="0,8,0,0">
-                <ListBox Height="150"
-                         ItemsSource="{Binding Logs}"
-                         ItemContainerStyle="{StaticResource PlainListBoxItem}"
-                         FontFamily="Cascadia Mono, Consolas"
-                         FontSize="11">
-                    <ListBox.ItemTemplate>
-                        <DataTemplate>
-                            <TextBlock TextWrapping="Wrap" Foreground="{Binding Level, Converter={StaticResource LogLevelToBrush}}">
-                                <Run Text="{Binding TimeText, Mode=OneWay}" />
-                                <Run Text="{Binding LevelText, Mode=OneWay}" FontWeight="Bold" />
-                                <Run Text="{Binding Message, Mode=OneWay}" />
-                            </TextBlock>
-                        </DataTemplate>
-                    </ListBox.ItemTemplate>
-                </ListBox>
+                                    <!-- Downloading state -->
+                                    <DataTrigger Binding="{Binding Stage}" Value="Downloading">
+                                        <Setter TargetName="BtnPause" Property="Visibility" Value="Visible" />
+                                        <Setter TargetName="BtnStop" Property="Visibility" Value="Visible" />
+                                    </DataTrigger>
+
+                                    <!-- Paused state -->
+                                    <DataTrigger Binding="{Binding Stage}" Value="Paused">
+                                        <Setter TargetName="PausedText" Property="Visibility" Value="Visible" />
+                                        <Setter TargetName="BtnResume" Property="Visibility" Value="Visible" />
+                                        <Setter TargetName="BtnStop" Property="Visibility" Value="Visible" />
+                                        <Setter TargetName="EtaTextDisplay" Property="Visibility" Value="Collapsed" />
+                                    </DataTrigger>
+
+                                    <!-- Queued state -->
+                                    <DataTrigger Binding="{Binding Stage}" Value="Queued">
+                                        <Setter TargetName="QueuedText" Property="Visibility" Value="Visible" />
+                                        <Setter TargetName="BtnCancelQueued" Property="Visibility" Value="Visible" />
+                                        <Setter TargetName="BtnMoveUp" Property="Visibility" Value="Visible" />
+                                        <Setter TargetName="BtnMoveDown" Property="Visibility" Value="Visible" />
+                                        <Setter TargetName="JobProgressBar" Property="Visibility" Value="Hidden" />
+                                        <Setter TargetName="PercentText" Property="Visibility" Value="Collapsed" />
+                                        <Setter TargetName="StatsPanel" Property="Visibility" Value="Collapsed" />
+                                    </DataTrigger>
+
+                                    <!-- Resolving state -->
+                                    <DataTrigger Binding="{Binding Stage}" Value="Resolving">
+                                        <Setter TargetName="QueuedText" Property="Visibility" Value="Visible" />
+                                        <Setter TargetName="QueuedText" Property="Text" Value="Получение данных…" />
+                                        <Setter TargetName="BtnPause" Property="Visibility" Value="Visible" />
+                                        <Setter TargetName="BtnStop" Property="Visibility" Value="Visible" />
+                                    </DataTrigger>
+
+                                    <!-- Failed state -->
+                                    <DataTrigger Binding="{Binding Stage}" Value="Failed">
+                                        <Setter TargetName="FailedText" Property="Visibility" Value="Visible" />
+                                        <Setter TargetName="JobProgressBar" Property="Foreground" Value="{DynamicResource Brush.Danger}" />
+                                    </DataTrigger>
+
+                                    <!-- Canceled state -->
+                                    <DataTrigger Binding="{Binding Stage}" Value="Canceled">
+                                        <Setter TargetName="QueuedText" Property="Visibility" Value="Visible" />
+                                        <Setter TargetName="QueuedText" Property="Text" Value="{loc:Str Stage.Canceled}" />
+                                        <Setter TargetName="JobProgressBar" Property="Visibility" Value="Hidden" />
+                                        <Setter TargetName="PercentText" Property="Visibility" Value="Collapsed" />
+                                        <Setter TargetName="StatsPanel" Property="Visibility" Value="Collapsed" />
+                                    </DataTrigger>
+                                </DataTemplate.Triggers>
+                            </DataTemplate>
+                        </ListBox.ItemTemplate>
+                    </ListBox>
+                </Grid>
             </Border>
-        </Expander>
 
-        <!-- Status bar -->
-        <Border Grid.Row="7"
-                Background="{DynamicResource Brush.Panel}"
-                CornerRadius="8"
-                Padding="12,7"
-                Margin="0,12,0,0">
-            <Grid>
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="*" />
-                    <ColumnDefinition Width="Auto" />
-                </Grid.ColumnDefinitions>
-                <TextBlock Grid.Column="0" Text="{Binding StatusText}" Style="{StaticResource SecondaryText}" VerticalAlignment="Center" />
-                <Button Grid.Column="1"
-                        Style="{StaticResource IconButton}"
-                        Content="{loc:Str Tools.Update}"
-                        Margin="12,0,0,0"
-                        VerticalAlignment="Center"
-                        Command="{Binding UpdateToolsCommand}"
-                        IsEnabled="{Binding IsUpdatingTools, Converter={StaticResource InverseBool}}" />
-            </Grid>
-        </Border>
+            <!-- ========================================== -->
+            <!-- CARD 5: BOTTOM STATUS BAR                  -->
+            <!-- ========================================== -->
+            <Border Grid.Row="6"
+                    Background="Transparent"
+                    Margin="4,8,4,0">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+
+                    <!-- Left: Status indicators -->
+                    <StackPanel Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center">
+                        <!-- Ready dot -->
+                        <Ellipse Width="7" Height="7"
+                                 Fill="{DynamicResource Brush.Success}"
+                                 Margin="0,0,8,0"
+                                 VerticalAlignment="Center" />
+
+                        <TextBlock Text="Scachalka готова"
+                                   FontWeight="SemiBold"
+                                   FontSize="12"
+                                   Foreground="{DynamicResource Brush.Text.Primary}"
+                                   VerticalAlignment="Center" />
+
+                        <TextBlock Text="|"
+                                   FontSize="11"
+                                   Foreground="{DynamicResource Brush.Border}"
+                                   Margin="10,0,10,0"
+                                   VerticalAlignment="Center" />
+
+                        <TextBlock Text="Все компоненты актуальны"
+                                   FontSize="11.5"
+                                   Foreground="{DynamicResource Brush.Text.Secondary}"
+                                   VerticalAlignment="Center" />
+                    </StackPanel>
+
+                    <!-- Right: Update Components Button -->
+                    <Button Grid.Column="1"
+                            Style="{StaticResource SecondaryOutlineButton}"
+                            Height="28"
+                            BorderThickness="0"
+                            Background="Transparent"
+                            Command="{Binding UpdateToolsCommand}"
+                            IsEnabled="{Binding IsUpdatingTools, Converter={StaticResource InverseBool}}"
+                            ToolTip="{loc:Str Tools.Update}">
+                        <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                            <Path Data="{StaticResource Icon.Sync}"
+                                  Fill="{DynamicResource Brush.Text.Secondary}"
+                                  Width="13" Height="13"
+                                  Stretch="Uniform"
+                                  Margin="0,0,6,0"
+                                  VerticalAlignment="Center" />
+                            <TextBlock Text="{loc:Str Tools.Update}"
+                                       FontSize="11.5"
+                                       Foreground="{DynamicResource Brush.Text.Secondary}"
+                                       VerticalAlignment="Center" />
+                        </StackPanel>
+                    </Button>
+                </Grid>
+            </Border>
+        </Grid>
     </Grid>
 </Window>

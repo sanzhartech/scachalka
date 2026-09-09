@@ -11,9 +11,33 @@
            vertical padding is what caused the earlier vertical clipping).
          - One corner radius and one input font size across the app. -->
 
-    <sys:Double x:Key="Metric.ControlHeight">32</sys:Double>
+    <sys:Double x:Key="Metric.ControlHeight">34</sys:Double>
     <sys:Double x:Key="Metric.InputFontSize">13</sys:Double>
-    <CornerRadius x:Key="Metric.CornerRadius">6</CornerRadius>
+    <CornerRadius x:Key="Metric.CornerRadius">8</CornerRadius>
+    <CornerRadius x:Key="Metric.CardCornerRadius">10</CornerRadius>
+
+    <!-- Vector Icon Geometries -->
+    <StreamGeometry x:Key="Icon.Link">M 3.9 12 C 3.9 10.29 5.29 8.9 7 8.9 L 11 8.9 L 11 10.9 L 7 10.9 C 6.4 10.9 5.9 11.4 5.9 12 C 5.9 12.6 6.4 13.1 7 13.1 L 11 13.1 L 11 15.1 L 7 15.1 C 5.29 15.1 3.9 13.71 3.9 12 Z M 8 13 L 8 11 L 16 11 L 16 13 Z M 17 8.9 C 18.71 8.9 20.1 10.29 20.1 12 C 20.1 13.71 18.71 15.1 17 15.1 L 13 15.1 L 13 13.1 L 17 13.1 C 17.6 13.1 18.1 12.6 18.1 12 C 18.1 11.4 17.6 10.9 17 10.9 L 13 10.9 L 13 8.9 L 17 8.9 Z</StreamGeometry>
+    <StreamGeometry x:Key="Icon.Download">M 19 9 L 15 9 L 15 3 L 9 3 L 9 9 L 5 9 L 12 16 Z M 5 18 L 19 18 L 19 20 L 5 20 Z</StreamGeometry>
+    <StreamGeometry x:Key="Icon.Settings">M 19.14 12.94 c 0.04 -0.3 0.06 -0.61 0.06 -0.94 c 0 -0.32 -0.02 -0.64 -0.07 -0.94 l 2.03 -1.58 c 0.18 -0.14 0.23 -0.41 0.12 -0.61 l -1.92 -3.32 c -0.12 -0.22 -0.37 -0.29 -0.59 -0.22 l -2.39 0.96 c -0.5 -0.38 -1.03 -0.7 -1.62 -0.94 l -0.36 -2.54 c -0.04 -0.24 -0.24 -0.41 -0.48 -0.41 h -3.84 c -0.24 0 -0.43 0.17 -0.47 0.41 l -0.36 2.54 c -0.59 0.24 -1.13 0.57 -1.62 0.94 l -2.39 -0.96 c -0.22 -0.08 -0.47 0 -0.59 0.22 L 2.74 8.87 c -0.12 0.21 -0.08 0.47 0.12 0.61 l 2.03 1.58 c -0.05 0.3 -0.09 0.63 -0.09 0.94 s 0.02 0.64 0.07 0.94 l -2.03 1.58 c -0.18 0.14 -0.23 0.41 -0.12 0.61 l 1.92 3.32 c 0.12 0.22 0.37 0.29 0.59 0.22 l 2.39 -0.96 c 0.5 0.38 1.03 0.7 1.62 0.94 l 0.36 2.54 c 0.05 0.24 0.24 0.41 0.48 0.41 h 3.84 c 0.24 0 0.44 -0.17 0.47 -0.41 l 0.36 -2.54 c 0.59 -0.24 1.13 -0.56 1.62 -0.94 l 2.39 0.96 c 0.22 0.08 0.47 0 0.59 -0.22 l 1.92 -3.32 c 0.12 -0.22 0.07 -0.47 -0.12 -0.61 z M 12 15.6 c -1.98 0 -3.6 -1.62 -3.6 -3.6 s 1.62 -3.6 3.6 -3.6 s 3.6 1.62 3.6 3.6 s -1.62 3.6 -3.6 3.6 z</StreamGeometry>
+    <StreamGeometry x:Key="Icon.Folder">M 10 4 H 4 c -1.1 0 -1.99 0.9 -1.99 2 L 2 18 c 0 1.1 0.9 2 2 2 h 16 c 1.1 0 2 -0.9 2 -2 V 8 c 0 -1.1 -0.9 -2 -2 -2 h -8 l -2 -2 z</StreamGeometry>
+    <StreamGeometry x:Key="Icon.Equalizer">M 10 20 h 4 V 4 h -4 v 16 z m -6 0 h 4 v -8 H 4 v 8 z M 16 9 v 11 h 4 V 9 h -4 z</StreamGeometry>
+    <StreamGeometry x:Key="Icon.Video">M 17 10.5 V 7 c 0 -0.55 -0.45 -1 -1 -1 H 4 c -0.55 0 -1 0.45 -1 1 v 10 c 0 0.55 0.45 1 1 1 h 12 c 0.55 0 1 -0.45 1 -1 v -3.5 l 4 4 v -11 l -4 4 z</StreamGeometry>
+    <StreamGeometry x:Key="Icon.Globe">M 12 2 C 6.48 2 2 6.48 2 12 C 2 17.52 6.48 22 12 22 C 17.52 22 22 17.52 22 12 C 22 6.48 17.52 2 12 2 Z M 11 4.07 C 7.55 4.55 4.8 7.37 4.17 11 L 8.35 11 C 8.64 8.04 9.61 5.6 11 4.07 Z M 13 4.07 C 14.39 5.6 15.36 8.04 15.65 11 L 19.83 11 C 19.2 7.37 16.45 4.55 13 4.07 Z M 4.17 13 C 4.8 16.63 7.55 19.45 11 19.93 C 9.61 18.4 8.64 15.96 8.35 13 L 4.17 13 Z M 13 19.93 C 16.45 19.45 19.2 16.63 19.83 13 L 15.65 13 C 15.36 15.96 14.39 18.4 13 19.93 Z M 10.36 11 L 13.64 11 C 13.37 8.31 12.63 6.07 12 5.06 C 11.37 6.07 10.63 8.31 10.36 11 Z M 10.36 13 C 10.63 15.69 11.37 17.93 12 18.94 C 12.63 17.93 13.37 15.69 13.64 13 L 10.36 13 Z</StreamGeometry>
+    <StreamGeometry x:Key="Icon.Trash">M 6 19 c 0 1.1 0.9 2 2 2 h 8 c 1.1 0 2 -0.9 2 -2 V 7 H 6 v 12 z M 19 4 h -3.5 l -1 -1 h -5 l -1 1 H 5 v 2 h 14 V 4 z</StreamGeometry>
+    <StreamGeometry x:Key="Icon.Play">M 8 5 v 14 l 11 -7 z</StreamGeometry>
+    <StreamGeometry x:Key="Icon.Pause">M 6 19 h 4 V 5 H 6 v 14 z m 8 -14 v 14 h 4 V 5 h -4 z</StreamGeometry>
+    <StreamGeometry x:Key="Icon.Stop">M 6 6 h 12 v 12 H 6 z</StreamGeometry>
+    <StreamGeometry x:Key="Icon.Close">M 19 6.41 L 17.59 5 L 12 10.59 L 6.41 5 L 5 6.41 L 10.59 12 L 5 17.59 L 6.41 19 L 12 13.41 L 17.59 19 L 19 17.59 L 13.41 12 z</StreamGeometry>
+    <StreamGeometry x:Key="Icon.Dots">M 12 8 c 1.1 0 2 -0.9 2 -2 s -0.9 -2 -2 -2 s -2 0.9 -2 2 s 0.9 2 2 2 z m 0 2 c -1.1 0 -2 0.9 -2 2 s 0.9 2 2 2 s 2 -0.9 2 -2 s -0.9 -2 -2 -2 z m 0 6 c -1.1 0 -2 0.9 -2 2 s 0.9 2 2 2 s 2 -0.9 2 -2 s -0.9 -2 -2 -2 z</StreamGeometry>
+    <StreamGeometry x:Key="Icon.Sync">M 12 4 V 1 L 8 5 l 4 4 V 6 c 3.31 0 6 2.69 6 6 c 0 1.01 -0.25 1.97 -0.7 2.8 l 1.46 1.46 C 19.54 15.03 20 13.57 20 12 c 0 -4.42 -3.58 -8 -8 -8 z m 0 14 c -3.31 0 -6 -2.69 -6 -6 c 0 -1.01 0.25 -1.97 0.7 -2.8 L 5.24 7.74 C 4.46 8.97 4 10.43 4 12 c 0 4.42 3.58 8 8 8 v 3 l 4 -4 l -4 -4 v 3 z</StreamGeometry>
+    <StreamGeometry x:Key="Icon.Check">M 9 16.17 L 4.83 12 l -1.42 1.41 L 9 19 L 21 7 l -1.41 -1.41 z</StreamGeometry>
+    <StreamGeometry x:Key="Icon.CheckCircle">M 12 2 C 6.48 2 2 6.48 2 12 s 4.48 10 10 10 s 10 -4.48 10 -10 S 17.52 2 12 2 z m -2 15 l -5 -5 l 1.41 -1.41 L 10 14.17 l 7.59 -7.59 L 19 8 l -9 9 z</StreamGeometry>
+    <StreamGeometry x:Key="Icon.ChevronDown">M 7.41 8.59 L 12 13.17 l 4.59 -4.58 L 18 10 l -6 6 l -6 -6 l 1.41 -1.41 z</StreamGeometry>
+    <StreamGeometry x:Key="Icon.ChevronUp">M 7.41 15.41 L 12 10.83 l 4.59 4.58 L 18 14 l -6 -6 l -6 6 z</StreamGeometry>
+    <StreamGeometry x:Key="Icon.ArrowUp">M 7.41 15.41 L 12 10.83 l 4.59 4.58 L 18 14 l -6 -6 l -6 6 z</StreamGeometry>
+    <StreamGeometry x:Key="Icon.ArrowDown">M 7.41 8.59 L 12 13.17 l 4.59 -4.58 L 18 10 l -6 6 l -6 -6 l 1.41 -1.41 z</StreamGeometry>
+    <StreamGeometry x:Key="Icon.Queue">M 4 6 H 2 v 14 c 0 1.1 0.9 2 2 2 h 14 v -2 H 4 V 6 z m 16 -4 H 8 c -1.1 0 -2 0.9 -2 2 v 12 c 0 1.1 0.9 2 2 2 h 12 c 1.1 0 2 -0.9 2 -2 V 4 c 0 -1.1 -0.9 -2 -2 -2 z m 0 14 H 8 V 4 h 12 v 12 z</StreamGeometry>
 
     <Style TargetType="TextBlock">
         <Setter Property="Foreground" Value="{DynamicResource Brush.Text.Primary}" />
@@ -136,6 +160,151 @@
                         </Trigger>
                         <Trigger Property="IsEnabled" Value="False">
                             <Setter Property="Opacity" Value="0.45" />
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <!-- Primary large blue button for 'Вставить и скачать' -->
+    <Style x:Key="PrimaryAccentButton" TargetType="Button">
+        <Setter Property="Background" Value="{DynamicResource Brush.Accent}" />
+        <Setter Property="BorderBrush" Value="{DynamicResource Brush.Accent}" />
+        <Setter Property="Foreground" Value="White" />
+        <Setter Property="Cursor" Value="Hand" />
+        <Setter Property="SnapsToDevicePixels" Value="True" />
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="Button">
+                    <Border x:Name="Root"
+                            Background="{TemplateBinding Background}"
+                            BorderBrush="{TemplateBinding BorderBrush}"
+                            BorderThickness="0"
+                            CornerRadius="{StaticResource Metric.CornerRadius}"
+                            SnapsToDevicePixels="True">
+                        <ContentPresenter Margin="{TemplateBinding Padding}"
+                                          HorizontalAlignment="Center"
+                                          VerticalAlignment="Center"
+                                          RecognizesAccessKey="True" />
+                    </Border>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter TargetName="Root" Property="Background" Value="{DynamicResource Brush.Accent.Hover}" />
+                        </Trigger>
+                        <Trigger Property="IsPressed" Value="True">
+                            <Setter TargetName="Root" Property="Background" Value="#FF1E40AF" />
+                        </Trigger>
+                        <Trigger Property="IsEnabled" Value="False">
+                            <Setter Property="Opacity" Value="0.45" />
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <!-- Secondary white outline button for 'Массовый импорт ссылок' -->
+    <Style x:Key="SecondaryOutlineButton" TargetType="Button">
+        <Setter Property="Background" Value="{DynamicResource Brush.Card}" />
+        <Setter Property="BorderBrush" Value="{DynamicResource Brush.Border}" />
+        <Setter Property="Foreground" Value="{DynamicResource Brush.Text.Primary}" />
+        <Setter Property="Cursor" Value="Hand" />
+        <Setter Property="Padding" Value="12,0" />
+        <Setter Property="SnapsToDevicePixels" Value="True" />
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="Button">
+                    <Border x:Name="Root"
+                            Background="{TemplateBinding Background}"
+                            BorderBrush="{TemplateBinding BorderBrush}"
+                            BorderThickness="1"
+                            CornerRadius="{StaticResource Metric.CornerRadius}"
+                            SnapsToDevicePixels="True">
+                        <ContentPresenter Margin="{TemplateBinding Padding}"
+                                          HorizontalAlignment="Center"
+                                          VerticalAlignment="Center"
+                                          RecognizesAccessKey="True" />
+                    </Border>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter TargetName="Root" Property="Background" Value="{DynamicResource Brush.Hover}" />
+                        </Trigger>
+                        <Trigger Property="IsEnabled" Value="False">
+                            <Setter Property="Opacity" Value="0.45" />
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <!-- Action button for queue rows -->
+    <Style x:Key="RowActionButton" TargetType="Button">
+        <Setter Property="Background" Value="Transparent" />
+        <Setter Property="BorderThickness" Value="0" />
+        <Setter Property="Foreground" Value="{DynamicResource Brush.Text.Primary}" />
+        <Setter Property="Width" Value="32" />
+        <Setter Property="Height" Value="32" />
+        <Setter Property="Cursor" Value="Hand" />
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="Button">
+                    <Border x:Name="Root"
+                            Background="{TemplateBinding Background}"
+                            CornerRadius="6"
+                            SnapsToDevicePixels="True">
+                        <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" />
+                    </Border>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter TargetName="Root" Property="Background" Value="{DynamicResource Brush.Hover}" />
+                        </Trigger>
+                        <Trigger Property="IsEnabled" Value="False">
+                            <Setter Property="Opacity" Value="0.3" />
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <!-- Window caption buttons -->
+    <Style x:Key="WindowCaptionButton" TargetType="Button">
+        <Setter Property="Background" Value="Transparent" />
+        <Setter Property="BorderThickness" Value="0" />
+        <Setter Property="Foreground" Value="{DynamicResource Brush.Text.Secondary}" />
+        <Setter Property="Width" Value="46" />
+        <Setter Property="Height" Value="36" />
+        <Setter Property="Cursor" Value="Hand" />
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="Button">
+                    <Border x:Name="Root" Background="{TemplateBinding Background}" SnapsToDevicePixels="True">
+                        <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" />
+                    </Border>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter TargetName="Root" Property="Background" Value="{DynamicResource Brush.Hover}" />
+                            <Setter Property="Foreground" Value="{DynamicResource Brush.Text.Primary}" />
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <Style x:Key="WindowCloseButton" TargetType="Button" BasedOn="{StaticResource WindowCaptionButton}">
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="Button">
+                    <Border x:Name="Root" Background="{TemplateBinding Background}" SnapsToDevicePixels="True">
+                        <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" />
+                    </Border>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter TargetName="Root" Property="Background" Value="#FFE81123" />
+                            <Setter Property="Foreground" Value="White" />
                         </Trigger>
                     </ControlTemplate.Triggers>
                 </ControlTemplate>
@@ -303,10 +472,156 @@
         <Setter Property="FontSize" Value="{StaticResource Metric.InputFontSize}" />
     </Style>
 
+    <Style x:Key="CardExpander" TargetType="Expander">
+        <Setter Property="Foreground" Value="{DynamicResource Brush.Text.Primary}" />
+        <Setter Property="Background" Value="{DynamicResource Brush.Card}" />
+        <Setter Property="BorderBrush" Value="{DynamicResource Brush.Border}" />
+        <Setter Property="BorderThickness" Value="1" />
+        <Setter Property="FontSize" Value="{StaticResource Metric.InputFontSize}" />
+        <Setter Property="SnapsToDevicePixels" Value="True" />
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="Expander">
+                    <Border Background="{TemplateBinding Background}"
+                            BorderBrush="{TemplateBinding BorderBrush}"
+                            BorderThickness="{TemplateBinding BorderThickness}"
+                            CornerRadius="{StaticResource Metric.CardCornerRadius}"
+                            Padding="16,10"
+                            SnapsToDevicePixels="True">
+                        <Grid>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition x:Name="ContentRow" Height="0" />
+                            </Grid.RowDefinitions>
+
+                            <ToggleButton Focusable="False"
+                                          ClickMode="Press"
+                                          IsChecked="{Binding IsExpanded, Mode=TwoWay, RelativeSource={RelativeSource TemplatedParent}}"
+                                          Background="Transparent"
+                                          Cursor="Hand">
+                                <ToggleButton.Template>
+                                    <ControlTemplate TargetType="ToggleButton">
+                                        <Border Background="Transparent">
+                                            <Grid>
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="*" />
+                                                    <ColumnDefinition Width="Auto" />
+                                                </Grid.ColumnDefinitions>
+
+                                                <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                                    <Path Data="{StaticResource Icon.Settings}"
+                                                          Fill="{DynamicResource Brush.Text.Primary}"
+                                                          Width="15" Height="15"
+                                                          Stretch="Uniform"
+                                                          Margin="0,0,10,0"
+                                                          VerticalAlignment="Center" />
+                                                    <ContentPresenter Content="{TemplateBinding Content}"
+                                                                      ContentTemplate="{TemplateBinding ContentTemplate}"
+                                                                      VerticalAlignment="Center" />
+                                                </StackPanel>
+
+                                                <Path x:Name="Arrow"
+                                                      Grid.Column="1"
+                                                      Data="{StaticResource Icon.ChevronDown}"
+                                                      Fill="{DynamicResource Brush.Text.Secondary}"
+                                                      Width="14" Height="14"
+                                                      Stretch="Uniform"
+                                                      VerticalAlignment="Center"
+                                                      HorizontalAlignment="Right" />
+                                            </Grid>
+                                        </Border>
+                                        <ControlTemplate.Triggers>
+                                            <Trigger Property="IsChecked" Value="True">
+                                                <Setter TargetName="Arrow" Property="Data" Value="{StaticResource Icon.ChevronUp}" />
+                                            </Trigger>
+                                        </ControlTemplate.Triggers>
+                                    </ControlTemplate>
+                                </ToggleButton.Template>
+                                <ContentPresenter ContentSource="Header" RecognizesAccessKey="True" />
+                            </ToggleButton>
+
+                            <Border x:Name="ExpContent"
+                                    Grid.Row="1"
+                                    Margin="0,12,0,0"
+                                    Padding="0,12,0,0"
+                                    BorderBrush="{DynamicResource Brush.Border}"
+                                    BorderThickness="0,1,0,0"
+                                    Visibility="Collapsed">
+                                <ContentPresenter />
+                            </Border>
+                        </Grid>
+                    </Border>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsExpanded" Value="True">
+                            <Setter TargetName="ContentRow" Property="Height" Value="*" />
+                            <Setter TargetName="ExpContent" Property="Visibility" Value="Visible" />
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
     <Style TargetType="ToolTip">
         <Setter Property="Background" Value="{DynamicResource Brush.Panel}" />
         <Setter Property="Foreground" Value="{DynamicResource Brush.Text.Primary}" />
         <Setter Property="BorderBrush" Value="{DynamicResource Brush.Border}" />
+    </Style>
+
+    <!-- Context menu & items styled to match Scachalka dark/light theme -->
+    <Style TargetType="ContextMenu">
+        <Setter Property="Background" Value="{DynamicResource Brush.Card}" />
+        <Setter Property="BorderBrush" Value="{DynamicResource Brush.Border}" />
+        <Setter Property="BorderThickness" Value="1" />
+        <Setter Property="Padding" Value="4" />
+        <Setter Property="SnapsToDevicePixels" Value="True" />
+        <Setter Property="OverridesDefaultStyle" Value="True" />
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="ContextMenu">
+                    <Border Background="{TemplateBinding Background}"
+                            BorderBrush="{TemplateBinding BorderBrush}"
+                            BorderThickness="{TemplateBinding BorderThickness}"
+                            CornerRadius="8"
+                            Padding="{TemplateBinding Padding}"
+                            SnapsToDevicePixels="True">
+                        <StackPanel IsItemsHost="True" KeyboardNavigation.DirectionalNavigation="Cycle" />
+                    </Border>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <Style TargetType="MenuItem">
+        <Setter Property="Foreground" Value="{DynamicResource Brush.Text.Primary}" />
+        <Setter Property="Background" Value="Transparent" />
+        <Setter Property="FontSize" Value="13" />
+        <Setter Property="Cursor" Value="Hand" />
+        <Setter Property="Padding" Value="12,8" />
+        <Setter Property="SnapsToDevicePixels" Value="True" />
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="MenuItem">
+                    <Border x:Name="ItemBorder"
+                            Background="{TemplateBinding Background}"
+                            CornerRadius="6"
+                            Padding="{TemplateBinding Padding}"
+                            SnapsToDevicePixels="True">
+                        <ContentPresenter ContentSource="Header"
+                                          RecognizesAccessKey="True"
+                                          VerticalAlignment="Center" />
+                    </Border>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsHighlighted" Value="True">
+                            <Setter TargetName="ItemBorder" Property="Background" Value="{DynamicResource Brush.Hover}" />
+                        </Trigger>
+                        <Trigger Property="IsEnabled" Value="False">
+                            <Setter Property="Opacity" Value="0.45" />
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
     </Style>
 
 </ResourceDictionary>

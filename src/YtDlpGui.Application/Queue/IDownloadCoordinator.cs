@@ -13,6 +13,11 @@ public interface IDownloadCoordinator : IAsyncDisposable
 
     void Cancel(DownloadJob job);
 
+    void Pause(DownloadJob job);
+
+    /// <returns>False when the job is not in a paused state.</returns>
+    bool Resume(DownloadJob job);
+
     /// <returns>False when the job is not in a retryable state.</returns>
     bool Retry(DownloadJob job);
 }

@@ -50,10 +50,54 @@ public sealed partial class MainViewModel : ObservableObject
 
     public IReadOnlyList<FormatOption> Formats => FormatOption.All;
 
-    public IReadOnlyList<QualityOption> Qualities => QualityOption.All;
+    public IReadOnlyList<QualityOption> Qualities => SelectedFormat.Value.IsVideo()
+        ? QualityOption.VideoQualities
+        : QualityOption.AudioQualities;
 
     [ObservableProperty]
     private string _urlInput = string.Empty;
+
+    public bool HasUrlInput => !string.IsNullOrWhiteSpace(UrlInput);
+
+    public string UrlCountText
+    {
+        get
+        {
+            if (string.IsNullOrWhiteSpace(UrlInput))
+            {
+                return _localizer.Language == "ru"
+                    ? "0 ссылок • Ctrl + V — вставить из буфера обмена"
+                    : "0 links • Ctrl + V — paste from clipboard";
+            }
+
+            var extraction = _urlValidator.Extract(UrlInput);
+            var count = extraction.Valid.Count > 0
+                ? extraction.Valid.Count
+                : UrlInput.Split('\n', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries).Length;
+
+            if (_localizer.Language == "ru")
+            {
+                var mod10 = count % 10;
+                var mod100 = count % 100;
+                string word;
+                if (mod100 >= 11 && mod100 <= 19) word = "ссылок";
+                else if (mod10 == 1) word = "ссылка";
+                else if (mod10 >= 2 && mod10 <= 4) word = "ссылки";
+                else word = "ссылок";
+
+                return $"{count} {word} • Ctrl + V — вставить из буфера обмена";
+            }
+            else
+            {
+                var word = count == 1 ? "link" : "links";
+                return $"{count} {word} • Ctrl + V — paste from clipboard";
+            }
+        }
+    }
+
+    public string QueueTitle => _localizer.Language == "ru"
+        ? $"Загрузки ({Jobs.Count})"
+        : $"Downloads ({Jobs.Count})";
 
     [ObservableProperty]
     private string _outputFolder = string.Empty;
@@ -88,6 +132,9 @@ public sealed partial class MainViewModel : ObservableObject
     // Advanced yt-dlp options.
 
     [ObservableProperty]
+    private bool _isAdvOptionsExpanded;
+
+    [ObservableProperty]
     private bool _allowPlaylists;
 
     [ObservableProperty]
@@ -118,7 +165,7 @@ public sealed partial class MainViewModel : ObservableObject
 
     public IReadOnlyList<LanguageOption> Languages => LanguageOption.All;
 
-    public bool IsQualityEnabled => SelectedFormat.Value.IsVideo();
+    public bool IsQualityEnabled => true;
 
     public bool IsSubtitleOptionEnabled => SelectedFormat.Value.IsVideo();
 
@@ -150,7 +197,7 @@ public sealed partial class MainViewModel : ObservableObject
         _localizer = localizer;
         _importService = importService;
         _bulkImportService = bulkImportService;
-        _dispatcher = System.Windows.Application.Current.Dispatcher;
+        _dispatcher = System.Windows.Application.Current?.Dispatcher ?? System.Windows.Threading.Dispatcher.CurrentDispatcher;
 
         ApplySettings(settings);
         _isInitialized = true;
@@ -160,6 +207,7 @@ public sealed partial class MainViewModel : ObservableObject
         _bulkImportService.ProgressChanged += OnBulkImportProgressChanged;
         _log.EntryAdded += OnLogEntryAdded;
         _localizer.LanguageChanged += OnLanguageChanged;
+        Jobs.CollectionChanged += (_, _) => OnPropertyChanged(nameof(QueueTitle));
         foreach (var entry in _log.GetSnapshot())
         {
             Logs.Add(entry);
@@ -173,6 +221,8 @@ public sealed partial class MainViewModel : ObservableObject
             // Recompute strings that were captured at their last event.
             RebuildToolStatus();
             UpdateStatus();
+            OnPropertyChanged(nameof(UrlCountText));
+            OnPropertyChanged(nameof(QueueTitle));
             foreach (var job in Jobs)
             {
                 job.RaiseLocalizedTextChanged();
@@ -228,12 +278,21 @@ public sealed partial class MainViewModel : ObservableObject
 
     private void OnJobEnqueued(object? sender, DownloadJob job)
     {
-        _dispatcher.BeginInvoke(() =>
+        void Add()
         {
             Jobs.Add(job);
             job.PropertyChanged += OnJobPropertyChanged;
             UpdateStatus();
-        });
+        }
+
+        if (_dispatcher.CheckAccess())
+        {
+            Add();
+        }
+        else
+        {
+            _dispatcher.BeginInvoke(Add);
+        }
     }
 
     private void OnJobPropertyChanged(object? sender, PropertyChangedEventArgs e)
@@ -272,6 +331,7 @@ public sealed partial class MainViewModel : ObservableObject
                 case DownloadStage.Completed: completed++; break;
                 case DownloadStage.Failed: failed++; break;
                 case DownloadStage.Canceled: canceled++; break;
+                case DownloadStage.Paused: break;
                 default: active++; break;
             }
         }
@@ -377,10 +437,23 @@ public sealed partial class MainViewModel : ObservableObject
 
     partial void OnAutoUpdateOnStartupChanged(bool value) => SaveSettingsSafe();
 
+    partial void OnUrlInputChanged(string value)
+    {
+        OnPropertyChanged(nameof(HasUrlInput));
+        OnPropertyChanged(nameof(UrlCountText));
+    }
+
     partial void OnSelectedFormatChanged(FormatOption value)
     {
+        OnPropertyChanged(nameof(Qualities));
         OnPropertyChanged(nameof(IsQualityEnabled));
         OnPropertyChanged(nameof(IsSubtitleOptionEnabled));
+
+        if (!Qualities.Any(q => q.Value == SelectedQuality?.Value))
+        {
+            SelectedQuality = Qualities[0];
+        }
+
         SaveSettingsSafe();
     }
 

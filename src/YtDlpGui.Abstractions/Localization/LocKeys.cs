@@ -57,6 +57,8 @@ public static class LocKeys
     public const string QueueTitle = "Queue.Title";
     public const string QueueClearFinished = "Queue.ClearFinished";
     public const string JobCancel = "Job.Cancel";
+    public const string JobPause = "Job.Pause";
+    public const string JobResume = "Job.Resume";
     public const string JobRetry = "Job.Retry";
     public const string JobShowInFolder = "Job.ShowInFolder";
     public const string JobEtaPrefix = "Job.EtaPrefix";
@@ -68,6 +70,7 @@ public static class LocKeys
     public const string StageQueuedRetryFormat = "Stage.QueuedRetryFormat";
     public const string StageResolving = "Stage.Resolving";
     public const string StageDownloading = "Stage.Downloading";
+    public const string StagePaused = "Stage.Paused";
     public const string StageMerging = "Stage.Merging";
     public const string StageConverting = "Stage.Converting";
     public const string StageCompleted = "Stage.Completed";

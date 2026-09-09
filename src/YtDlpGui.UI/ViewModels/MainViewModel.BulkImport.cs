@@ -14,6 +14,9 @@ namespace YtDlpGui.UI.ViewModels;
 /// </summary>
 public sealed partial class MainViewModel
 {
+    /// <summary>Delegate to pick bulk import file; defaults to OpenFileDialog, replaceable in unit tests.</summary>
+    public Func<string?>? PickImportFileAction { get; set; }
+
     [RelayCommand]
     private async Task BulkImportLinksAsync()
     {
@@ -29,21 +32,34 @@ public sealed partial class MainViewModel
             return;
         }
 
-        var dialog = new OpenFileDialog
+        string? filePath = null;
+        if (PickImportFileAction is not null)
         {
-            Title = Loc.T(LocKeys.BulkFileDialogTitle),
-            Filter = "Link files (*.csv;*.txt;*.json)|*.csv;*.txt;*.json|All files (*.*)|*.*",
-            CheckFileExists = true
-        };
+            filePath = PickImportFileAction();
+        }
+        else
+        {
+            var dialog = new OpenFileDialog
+            {
+                Title = Loc.T(LocKeys.BulkFileDialogTitle),
+                Filter = "Link files (*.csv;*.txt;*.json)|*.csv;*.txt;*.json|All files (*.*)|*.*",
+                CheckFileExists = true
+            };
 
-        if (dialog.ShowDialog() != true)
+            if (dialog.ShowDialog() == true)
+            {
+                filePath = dialog.FileName;
+            }
+        }
+
+        if (string.IsNullOrWhiteSpace(filePath))
         {
             return;
         }
 
         // Bulk links use the same format/quality/folder the user picked for manual adds.
         var request = new BulkImportRequest(
-            dialog.FileName, SelectedFormat.Value, SelectedQuality.Value, OutputFolder, BuildDownloadOptions());
+            filePath, SelectedFormat.Value, SelectedQuality.Value, OutputFolder, BuildDownloadOptions());
 
         _importCts = new CancellationTokenSource();
         IsImporting = true;

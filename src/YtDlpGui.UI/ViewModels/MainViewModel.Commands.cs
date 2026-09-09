@@ -15,6 +15,28 @@ public sealed partial class MainViewModel
     private void AddUrls() => EnqueueFromText(UrlInput, clearInputOnSuccess: true);
 
     [RelayCommand]
+    private void ClearUrlInput() => UrlInput = string.Empty;
+
+    [RelayCommand]
+    private void PasteAndDownload()
+    {
+        if (!string.IsNullOrWhiteSpace(UrlInput))
+        {
+            EnqueueFromText(UrlInput, clearInputOnSuccess: true);
+            return;
+        }
+
+        var text = _clipboard.GetText();
+        if (string.IsNullOrWhiteSpace(text))
+        {
+            StatusText = Loc.T(LocKeys.StatusClipboardNoText);
+            return;
+        }
+
+        EnqueueFromText(text, clearInputOnSuccess: false);
+    }
+
+    [RelayCommand]
     private void PasteFromClipboard()
     {
         var text = _clipboard.GetText();
@@ -66,31 +88,108 @@ public sealed partial class MainViewModel
         }
     }
 
+    /// <summary>Action to prompt user for output folder; defaults to OpenFolderDialog, replaceable in unit tests.</summary>
+    public Func<string, string?>? PickFolderAction { get; set; }
+
     [RelayCommand]
     private void BrowseFolder()
     {
-        var dialog = new OpenFolderDialog
+        try
         {
-            Title = "Choose the output folder",
-            InitialDirectory = Directory.Exists(OutputFolder) ? OutputFolder : string.Empty
-        };
+            string? selected = null;
+            if (PickFolderAction is not null)
+            {
+                selected = PickFolderAction(OutputFolder);
+            }
+            else
+            {
+                var dialog = new OpenFolderDialog
+                {
+                    Title = Loc.T(LocKeys.LabelOutputFolder),
+                    InitialDirectory = Directory.Exists(OutputFolder) ? OutputFolder : string.Empty
+                };
 
-        if (dialog.ShowDialog() == true)
+                if (dialog.ShowDialog() == true)
+                {
+                    selected = dialog.FolderName;
+                }
+            }
+
+            if (!string.IsNullOrWhiteSpace(selected))
+            {
+                OutputFolder = selected;
+                _log.Write(LogLevel.Info, $"Output folder set to: {OutputFolder}");
+            }
+        }
+        catch (Exception ex)
         {
-            OutputFolder = dialog.FolderName;
+            _log.Write(LogLevel.Warning, $"Browse folder failed: {ex.Message}");
+            StatusText = $"Ошибка выбора папки: {ex.Message}";
         }
     }
 
     [RelayCommand]
-    private void OpenOutputFolder() => _folderService.OpenFolder(OutputFolder);
+    private void OpenOutputFolder()
+    {
+        if (string.IsNullOrWhiteSpace(OutputFolder))
+        {
+            StatusText = "Папка сохранения не указана.";
+            return;
+        }
+
+        try
+        {
+            if (!Directory.Exists(OutputFolder))
+            {
+                Directory.CreateDirectory(OutputFolder);
+            }
+
+            if (!_folderService.OpenFolder(OutputFolder))
+            {
+                StatusText = $"Не удалось открыть папку: {OutputFolder}";
+            }
+        }
+        catch (Exception ex)
+        {
+            _log.Write(LogLevel.Error, $"Failed to open output folder '{OutputFolder}': {ex.Message}");
+            StatusText = $"Ошибка при открытии папки: {ex.Message}";
+        }
+    }
 
     [RelayCommand]
-    private void CancelJob(DownloadJob? job)
+    private void PauseJob(DownloadJob? job)
+    {
+        if (job is not null)
+        {
+            _coordinator.Pause(job);
+            UpdateStatus();
+        }
+    }
+
+    [RelayCommand]
+    private void ResumeJob(DownloadJob? job)
+    {
+        if (job is not null)
+        {
+            _coordinator.Resume(job);
+            UpdateStatus();
+        }
+    }
+
+    [RelayCommand]
+    private void StopJob(DownloadJob? job)
     {
         if (job is not null)
         {
             _coordinator.Cancel(job);
+            UpdateStatus();
         }
+    }
+
+    [RelayCommand]
+    private void CancelJob(DownloadJob? job)
+    {
+        StopJob(job);
     }
 
     [RelayCommand]
@@ -110,19 +209,158 @@ public sealed partial class MainViewModel
     [RelayCommand]
     private void OpenJobLocation(DownloadJob? job)
     {
-        if (job is null)
+        if (job is null) return;
+
+        var filePath = job.DestinationFile;
+        if (!string.IsNullOrWhiteSpace(filePath) && File.Exists(filePath))
+        {
+            var fullPath = Path.GetFullPath(filePath);
+            if (!_folderService.RevealFile(fullPath))
+            {
+                StatusText = "Не удалось открыть файл в проводнике.";
+            }
+            return;
+        }
+
+        // File is missing — open destination folder and show notification
+        var folder = !string.IsNullOrWhiteSpace(filePath)
+            ? Path.GetDirectoryName(filePath)
+            : job.Request.OutputFolder;
+
+        if (string.IsNullOrWhiteSpace(folder) || !Directory.Exists(folder))
+        {
+            folder = job.Request.OutputFolder;
+        }
+
+        if (!string.IsNullOrWhiteSpace(folder) && Directory.Exists(folder))
+        {
+            _folderService.OpenFolder(folder);
+            StatusText = "Файл не найден. Открыта папка сохранения.";
+        }
+        else
+        {
+            StatusText = "Файл и папка назначения не найдены.";
+            _log.Write(LogLevel.Warning, $"Destination folder not found: {folder}");
+        }
+    }
+
+    /// <summary>Delegate to launch a media file; replaceable in unit tests.</summary>
+    public Action<string>? OpenFileAction { get; set; }
+
+    [RelayCommand]
+    private void PlayJobFile(DownloadJob? job)
+    {
+        if (job is null) return;
+
+        var filePath = job.DestinationFile;
+        if (string.IsNullOrWhiteSpace(filePath) || !File.Exists(filePath))
+        {
+            StatusText = "Файл не найден на диске.";
+            _log.Write(LogLevel.Warning, $"Cannot play file — it does not exist: {filePath}");
+            return;
+        }
+
+        try
+        {
+            var fullPath = Path.GetFullPath(filePath);
+            if (OpenFileAction is not null)
+            {
+                OpenFileAction(fullPath);
+            }
+            else
+            {
+                using var process = System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo(fullPath)
+                {
+                    UseShellExecute = true
+                });
+            }
+        }
+        catch (Exception ex)
+        {
+            _log.Write(LogLevel.Error, $"Failed to open file '{filePath}': {ex.Message}");
+            StatusText = $"Не удалось открыть файл: {ex.Message}";
+        }
+    }
+
+    [RelayCommand]
+    private void MoveJobUp(DownloadJob? job)
+    {
+        if (job is null) return;
+        var index = Jobs.IndexOf(job);
+        if (index > 0)
+        {
+            Jobs.Move(index, index - 1);
+        }
+    }
+
+    [RelayCommand]
+    private void MoveJobDown(DownloadJob? job)
+    {
+        if (job is null) return;
+        var index = Jobs.IndexOf(job);
+        if (index >= 0 && index < Jobs.Count - 1)
+        {
+            Jobs.Move(index, index + 1);
+        }
+    }
+
+    [RelayCommand]
+    private void CopyJobUrl(DownloadJob? job)
+    {
+        if (job is not null && !string.IsNullOrWhiteSpace(job.Url))
+        {
+            _clipboard.SetText(job.Url);
+            StatusText = "Ссылка скопирована в буфер обмена";
+            _log.Write(LogLevel.Info, $"Copied URL to clipboard: {job.Url}");
+        }
+    }
+
+    [RelayCommand]
+    private void DeleteJob(DownloadJob? job)
+    {
+        if (job is null) return;
+        CancelJob(job);
+        job.PropertyChanged -= OnJobPropertyChanged;
+        Jobs.Remove(job);
+        UpdateStatus();
+    }
+
+    /// <summary>Action to prompt user confirmation before deleting file from disk.</summary>
+    public Func<string, bool> ConfirmDeleteAction { get; set; } = msg => YtDlpGui.UI.Views.ConfirmDeleteDialog.Show(msg);
+
+    [RelayCommand]
+    private void DeleteJobFile(DownloadJob? job)
+    {
+        if (job is null) return;
+
+        if (!ConfirmDeleteAction("Удалить файл с компьютера?"))
         {
             return;
         }
 
         if (!string.IsNullOrEmpty(job.DestinationFile))
         {
-            _folderService.RevealFile(job.DestinationFile);
+            try
+            {
+                if (File.Exists(job.DestinationFile))
+                {
+                    File.Delete(job.DestinationFile);
+                }
+
+                var partFile = job.DestinationFile + ".part";
+                if (File.Exists(partFile))
+                {
+                    File.Delete(partFile);
+                }
+            }
+            catch (Exception ex)
+            {
+                _log.Write(LogLevel.Warning, $"Failed to delete file '{job.DestinationFile}': {ex.Message}");
+                StatusText = $"Не удалось удалить файл: {ex.Message}";
+            }
         }
-        else
-        {
-            _folderService.OpenFolder(job.Request.OutputFolder);
-        }
+
+        DeleteJob(job);
     }
 
     [RelayCommand]
@@ -130,7 +368,8 @@ public sealed partial class MainViewModel
     {
         for (var i = Jobs.Count - 1; i >= 0; i--)
         {
-            if (Jobs[i].IsTerminal)
+            var stage = Jobs[i].Stage;
+            if (stage is DownloadStage.Completed or DownloadStage.Canceled)
             {
                 Jobs[i].PropertyChanged -= OnJobPropertyChanged;
                 Jobs.RemoveAt(i);
@@ -139,6 +378,14 @@ public sealed partial class MainViewModel
 
         UpdateStatus();
     }
+
+    // Command aliases to match any naming variation used across the app / specifications
+    public IRelayCommand<DownloadJob?> ShowJobFolderCommand => OpenJobLocationCommand;
+    public IRelayCommand<DownloadJob?> RemoveJobCommand => DeleteJobCommand;
+    public IRelayCommand ClearCompletedCommand => ClearFinishedCommand;
+    public IRelayCommand OpenFolderCommand => OpenOutputFolderCommand;
+    public IAsyncRelayCommand MassImportCommand => BulkImportLinksCommand;
+    public IAsyncRelayCommand UpdateComponentsCommand => UpdateToolsCommand;
 
     [RelayCommand]
     private async Task RecheckToolsAsync() => await RefreshToolsAsync();
