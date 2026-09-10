@@ -59,41 +59,9 @@ public sealed partial class MainViewModel : ObservableObject
 
     public bool HasUrlInput => !string.IsNullOrWhiteSpace(UrlInput);
 
-    public string UrlCountText
-    {
-        get
-        {
-            if (string.IsNullOrWhiteSpace(UrlInput))
-            {
-                return _localizer.Language == "ru"
-                    ? "0 ссылок • Ctrl + V — вставить из буфера обмена"
-                    : "0 links • Ctrl + V — paste from clipboard";
-            }
-
-            var extraction = _urlValidator.Extract(UrlInput);
-            var count = extraction.Valid.Count > 0
-                ? extraction.Valid.Count
-                : UrlInput.Split('\n', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries).Length;
-
-            if (_localizer.Language == "ru")
-            {
-                var mod10 = count % 10;
-                var mod100 = count % 100;
-                string word;
-                if (mod100 >= 11 && mod100 <= 19) word = "ссылок";
-                else if (mod10 == 1) word = "ссылка";
-                else if (mod10 >= 2 && mod10 <= 4) word = "ссылки";
-                else word = "ссылок";
-
-                return $"{count} {word} • Ctrl + V — вставить из буфера обмена";
-            }
-            else
-            {
-                var word = count == 1 ? "link" : "links";
-                return $"{count} {word} • Ctrl + V — paste from clipboard";
-            }
-        }
-    }
+    public string UrlCountText => _localizer.Language == "ru"
+        ? "Ctrl + V — вставить из буфера обмена"
+        : "Ctrl + V — paste from clipboard";
 
     public string QueueTitle => _localizer.Language == "ru"
         ? $"Загрузки ({Jobs.Count})"

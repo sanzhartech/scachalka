@@ -22,7 +22,7 @@ public static partial class StringCatalog
         [LocKeys.ToolsMissingJoin] = " and ",
         [LocKeys.ToolsCheckFailed] = "Tool check failed — see the log.",
 
-        [LocKeys.UrlHint] = "Video / audio URLs — one or many, separated by spaces or new lines. Drag & drop works too.",
+        [LocKeys.UrlHint] = "Supports YouTube, TikTok, Instagram, Facebook, and other platforms.",
         [LocKeys.BtnAddToQueue] = "Add to queue",
         [LocKeys.BtnAddTooltip] = "Ctrl+Enter",
         [LocKeys.BtnPasteAdd] = "Paste & Download",

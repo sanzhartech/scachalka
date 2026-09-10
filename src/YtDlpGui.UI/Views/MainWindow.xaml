@@ -198,61 +198,89 @@
                     BorderBrush="{DynamicResource Brush.Border}"
                     BorderThickness="1"
                     CornerRadius="{StaticResource Metric.CardCornerRadius}"
-                    Padding="16"
+                    Padding="16,12"
                     Margin="0,0,0,10">
                 <Grid>
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="*" />
-                        <ColumnDefinition Width="Auto" />
-                    </Grid.ColumnDefinitions>
+                    <Grid.RowDefinitions>
+                        <!-- Title + Subtitle -->
+                        <RowDefinition Height="Auto" />
+                        <!-- Input Row: Single-line URL + Buttons -->
+                        <RowDefinition Height="Auto" />
+                        <!-- Bottom Shortcut Hint -->
+                        <RowDefinition Height="Auto" />
+                    </Grid.RowDefinitions>
 
-                    <!-- Left: Header, Multi-line Box, Counter -->
-                    <Grid Grid.Column="0">
-                        <Grid.RowDefinitions>
-                            <RowDefinition Height="Auto" />
-                            <RowDefinition Height="Auto" />
-                            <RowDefinition Height="Auto" />
-                        </Grid.RowDefinitions>
+                    <!-- Title + subtitle -->
+                    <StackPanel Grid.Row="0" Orientation="Horizontal" Margin="0,0,0,8" VerticalAlignment="Center">
+                        <Grid Width="19" Height="19" Margin="0,0,8,0" VerticalAlignment="Center">
+                            <Image Source="pack://application:,,,/YtDlpGui.UI;component/Assets/free-icon-link-2985013.png"
+                                   Width="19" Height="19"
+                                   RenderOptions.BitmapScalingMode="HighQuality"
+                                   VerticalAlignment="Center">
+                                <Image.Style>
+                                    <Style TargetType="Image">
+                                        <Setter Property="Visibility" Value="Visible" />
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding IsDarkTheme}" Value="True">
+                                                <Setter Property="Visibility" Value="Collapsed" />
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </Image.Style>
+                            </Image>
+                            <Rectangle Fill="{DynamicResource Brush.Text.Primary}" Width="19" Height="19">
+                                <Rectangle.Style>
+                                    <Style TargetType="Rectangle">
+                                        <Setter Property="Visibility" Value="Collapsed" />
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding IsDarkTheme}" Value="True">
+                                                <Setter Property="Visibility" Value="Visible" />
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </Rectangle.Style>
+                                <Rectangle.OpacityMask>
+                                    <ImageBrush ImageSource="pack://application:,,,/YtDlpGui.UI;component/Assets/free-icon-link-2985013.png" Stretch="Uniform" />
+                                </Rectangle.OpacityMask>
+                            </Rectangle>
+                        </Grid>
+                        <TextBlock Text="Вставьте ссылки"
+                                   FontWeight="SemiBold"
+                                   FontSize="13.5"
+                                   Foreground="{DynamicResource Brush.Text.Primary}"
+                                   VerticalAlignment="Center" />
+                        <TextBlock Text="{loc:Str Url.Hint}"
+                                   FontSize="11.5"
+                                   Foreground="{DynamicResource Brush.Text.Secondary}"
+                                   Margin="10,0,0,0"
+                                   VerticalAlignment="Center" />
+                    </StackPanel>
 
-                        <!-- Title + subtitle -->
-                        <StackPanel Grid.Row="0" Orientation="Horizontal" Margin="0,0,0,8" VerticalAlignment="Center">
-                            <Path Data="{StaticResource Icon.Link}"
-                                  Fill="{DynamicResource Brush.Accent}"
-                                  Width="16" Height="16"
-                                  Stretch="Uniform"
-                                  Margin="0,0,8,0"
-                                  VerticalAlignment="Center" />
-                            <TextBlock Text="Вставьте ссылки"
-                                       FontWeight="SemiBold"
-                                       FontSize="13.5"
-                                       Foreground="{DynamicResource Brush.Text.Primary}"
-                                       VerticalAlignment="Center" />
-                            <TextBlock Text="{loc:Str Url.Hint}"
-                                       FontSize="11.5"
-                                       Foreground="{DynamicResource Brush.Text.Secondary}"
-                                       Margin="10,0,0,0"
-                                       VerticalAlignment="Center" />
-                        </StackPanel>
+                    <!-- Single-line URL Input + Side-by-side Buttons in one horizontal row -->
+                    <Grid Grid.Row="1">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
 
                         <!-- Input box with inner clear button -->
-                        <Grid Grid.Row="1">
+                        <Grid Grid.Column="0">
                             <TextBox Text="{Binding UrlInput, UpdateSourceTrigger=PropertyChanged}"
-                                     AcceptsReturn="True"
-                                     TextWrapping="Wrap"
-                                     VerticalScrollBarVisibility="Auto"
-                                     VerticalContentAlignment="Top"
-                                     Height="74"
-                                     Padding="10,8,30,8">
+                                     Height="36"
+                                     VerticalContentAlignment="Center"
+                                     Padding="10,0,32,0"
+                                     FontSize="13">
                                 <TextBox.InputBindings>
+                                    <KeyBinding Key="Return" Command="{Binding PasteAndDownloadCommand}" />
                                     <KeyBinding Modifiers="Control" Key="Return" Command="{Binding PasteAndDownloadCommand}" />
                                 </TextBox.InputBindings>
                             </TextBox>
 
-                            <!-- Clear 'x' button inside top right -->
+                            <!-- Clear 'x' button inside right -->
                             <Button Style="{StaticResource RowActionButton}"
                                     HorizontalAlignment="Right"
-                                    VerticalAlignment="Top"
-                                    Margin="0,4,4,0"
+                                    VerticalAlignment="Center"
+                                    Margin="0,0,4,0"
                                     Width="24" Height="24"
                                     Command="{Binding ClearUrlInputCommand}"
                                     Visibility="{Binding HasUrlInput, Converter={StaticResource BoolToVisibility}}"
@@ -264,72 +292,62 @@
                             </Button>
                         </Grid>
 
-                        <!-- Bottom caption under textbox -->
-                        <TextBlock Grid.Row="2"
-                                   Text="{Binding UrlCountText}"
-                                   FontSize="11.5"
-                                   Foreground="{DynamicResource Brush.Text.Secondary}"
-                                   Margin="2,6,0,0" />
-                    </Grid>
-
-                    <!-- Right: Primary & Secondary Buttons -->
-                    <StackPanel Grid.Column="1"
-                                Width="196"
-                                Margin="14,0,0,0"
-                                VerticalAlignment="Top">
-                        <!-- Primary Blue Button: 'Вставить и скачать' -->
-                        <Button Style="{StaticResource PrimaryAccentButton}"
-                                Height="48"
-                                Command="{Binding PasteAndDownloadCommand}"
-                                ToolTip="{loc:Str Btn.PasteTooltip}">
-                            <Grid HorizontalAlignment="Center" VerticalAlignment="Center">
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="Auto" />
-                                    <ColumnDefinition Width="*" />
-                                </Grid.ColumnDefinitions>
-
-                                <Path Grid.Column="0"
-                                      Data="{StaticResource Icon.Download}"
-                                      Fill="White"
-                                      Width="18" Height="18"
-                                      Stretch="Uniform"
-                                      Margin="0,0,10,0"
-                                      VerticalAlignment="Center" />
-
-                                <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                        <!-- Primary & Secondary Buttons side-by-side to the right of URL field -->
+                        <StackPanel Grid.Column="1"
+                                    Orientation="Horizontal"
+                                    Margin="10,0,0,0"
+                                    VerticalAlignment="Center">
+                            <!-- Primary Blue Button: 'Вставить и скачать' -->
+                            <Button Style="{StaticResource PrimaryAccentButton}"
+                                    Height="36"
+                                    Padding="16,0"
+                                    Command="{Binding PasteAndDownloadCommand}"
+                                    ToolTip="{loc:Str Btn.PasteTooltip}">
+                                <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                    <Path Data="{StaticResource Icon.Download}"
+                                          Fill="White"
+                                          Width="15" Height="15"
+                                          Stretch="Uniform"
+                                          Margin="0,0,8,0"
+                                          VerticalAlignment="Center" />
                                     <TextBlock Text="{loc:Str Btn.PasteAdd}"
                                                FontWeight="SemiBold"
-                                               FontSize="13.5"
-                                               Foreground="White" />
-                                    <TextBlock Text="Ctrl + V"
-                                               FontSize="11"
-                                               Foreground="#FFBFDBFE"
-                                               Margin="0,1,0,0" />
+                                               FontSize="13"
+                                               Foreground="White"
+                                               VerticalAlignment="Center" />
                                 </StackPanel>
-                            </Grid>
-                        </Button>
+                            </Button>
 
-                        <!-- Secondary White Outline Button: 'Массовый импорт ссылок' -->
-                        <Button Style="{StaticResource SecondaryOutlineButton}"
-                                Height="38"
-                                Margin="0,8,0,0"
-                                Command="{Binding BulkImportLinksCommand}"
-                                IsEnabled="{Binding IsImporting, Converter={StaticResource InverseBool}}"
-                                ToolTip="{loc:Str Btn.BulkImportTooltip}">
-                            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center">
-                                <Path Data="{StaticResource Icon.Link}"
-                                      Fill="{DynamicResource Brush.Text.Secondary}"
-                                      Width="13" Height="13"
-                                      Stretch="Uniform"
-                                      Margin="0,0,8,0"
-                                      VerticalAlignment="Center" />
-                                <TextBlock Text="{loc:Str Btn.BulkImport}"
-                                           FontSize="12.5"
-                                           FontWeight="Medium"
-                                           VerticalAlignment="Center" />
-                            </StackPanel>
-                        </Button>
-                    </StackPanel>
+                            <!-- Secondary White Outline Button: 'Массовый импорт ссылок' -->
+                            <Button Style="{StaticResource SecondaryOutlineButton}"
+                                    Height="36"
+                                    Margin="8,0,0,0"
+                                    Padding="14,0"
+                                    Command="{Binding BulkImportLinksCommand}"
+                                    IsEnabled="{Binding IsImporting, Converter={StaticResource InverseBool}}"
+                                    ToolTip="{loc:Str Btn.BulkImportTooltip}">
+                                <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                    <Path Data="{StaticResource Icon.Link}"
+                                          Fill="{DynamicResource Brush.Text.Secondary}"
+                                          Width="13" Height="13"
+                                          Stretch="Uniform"
+                                          Margin="0,0,7,0"
+                                          VerticalAlignment="Center" />
+                                    <TextBlock Text="{loc:Str Btn.BulkImport}"
+                                               FontSize="12.5"
+                                               FontWeight="Medium"
+                                               VerticalAlignment="Center" />
+                                </StackPanel>
+                            </Button>
+                        </StackPanel>
+                    </Grid>
+
+                    <!-- Bottom shortcut caption under textbox -->
+                    <TextBlock Grid.Row="2"
+                               Text="{Binding UrlCountText}"
+                               FontSize="11.5"
+                               Foreground="{DynamicResource Brush.Text.Secondary}"
+                               Margin="2,6,0,0" />
                 </Grid>
             </Border>
 
@@ -416,7 +434,9 @@
                             <TextBox Grid.Column="0"
                                      Text="{Binding OutputFolder, UpdateSourceTrigger=LostFocus}"
                                      Height="34"
-                                     VerticalContentAlignment="Center" />
+                                     Padding="10,0"
+                                     VerticalContentAlignment="Center"
+                                     FontSize="13" />
 
                             <Button Grid.Column="1"
                                     Style="{StaticResource SecondaryOutlineButton}"

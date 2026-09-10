@@ -22,7 +22,7 @@ public static partial class StringCatalog
         [LocKeys.ToolsMissingJoin] = " и ",
         [LocKeys.ToolsCheckFailed] = "Не удалось проверить инструменты — смотрите журнал.",
 
-        [LocKeys.UrlHint] = "Ссылки на видео / аудио — одна или несколько через пробел или с новой строки. Работает Drag & drop.",
+        [LocKeys.UrlHint] = "Поддерживает YouTube, TikTok, Instagram, Facebook и другие платформы.",
         [LocKeys.BtnAddToQueue] = "Добавить в очередь",
         [LocKeys.BtnAddTooltip] = "Ctrl+Enter",
         [LocKeys.BtnPasteAdd] = "Вставить и скачать",
