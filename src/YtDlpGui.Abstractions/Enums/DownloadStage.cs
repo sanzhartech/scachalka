@@ -6,6 +6,7 @@ public enum DownloadStage
     Queued,
     Resolving,
     Downloading,
+    Paused,
     Merging,
     Converting,
     Completed,

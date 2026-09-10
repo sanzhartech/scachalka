@@ -11,5 +11,8 @@ public enum DownloadErrorKind
     PermissionDenied,
     FileExists,
     Interrupted,
+
+    /// <summary>The browser is running and locks its cookie database (--cookies-from-browser failed).</summary>
+    CookieBrowserLocked,
     Unknown
 }

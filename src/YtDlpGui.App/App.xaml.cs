@@ -75,26 +75,15 @@ public partial class App
     {
         if (_services is not null)
         {
-            ShutdownDownloads(_services);
-            _services.GetRequiredService<LogService>().Dispose();
-            _services.Dispose();
+            // Graceful shutdown: ServiceProvider.DisposeAsync disposes all IAsyncDisposable
+            // services (such as DownloadCoordinator) and IDisposable services (such as LogService)
+            // in correct dependency order without throwing InvalidOperationException.
+            // Synchronous bounded wait: OnExit cannot be async, and we must not hang shutdown.
+            _services.DisposeAsync().AsTask().Wait(ShutdownWait);
+            _services = null;
         }
 
         base.OnExit(e);
-    }
-
-    private static void ShutdownDownloads(ServiceProvider services)
-    {
-        try
-        {
-            var coordinator = services.GetRequiredService<IDownloadCoordinator>();
-            // Synchronous bounded wait: OnExit cannot be async, and we must not hang shutdown.
-            coordinator.DisposeAsync().AsTask().Wait(ShutdownWait);
-        }
-        catch (Exception)
-        {
-            // The process is exiting; the OS reclaims anything left behind.
-        }
     }
 
     private void OnDispatcherUnhandledException(object sender, DispatcherUnhandledExceptionEventArgs e)

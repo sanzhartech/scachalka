@@ -7,6 +7,7 @@ using YtDlpGui.Abstractions.Enums;
 using YtDlpGui.Abstractions.Interfaces;
 using YtDlpGui.Abstractions.Localization;
 using YtDlpGui.Abstractions.Models;
+using YtDlpGui.Application.Import;
 using YtDlpGui.Application.Jobs;
 using YtDlpGui.Application.Queue;
 using YtDlpGui.Application.Tools;
@@ -29,11 +30,14 @@ public sealed partial class MainViewModel : ObservableObject
     private readonly ISettingsStore _settingsStore;
     private readonly AppSettings _settings;
     private readonly IToolLocator _toolLocator;
+    private readonly IToolUpdater _toolUpdater;
     private readonly ToolContext _toolContext;
     private readonly ILogSink _log;
     private readonly IFolderService _folderService;
     private readonly IClipboardService _clipboard;
     private readonly ILocalizer _localizer;
+    private readonly ILibraryImportService _importService;
+    private readonly IBulkImportService _bulkImportService;
     private readonly Dispatcher _dispatcher;
     private readonly bool _isInitialized;
 
@@ -46,10 +50,22 @@ public sealed partial class MainViewModel : ObservableObject
 
     public IReadOnlyList<FormatOption> Formats => FormatOption.All;
 
-    public IReadOnlyList<QualityOption> Qualities => QualityOption.All;
+    public IReadOnlyList<QualityOption> Qualities => SelectedFormat.Value.IsVideo()
+        ? QualityOption.VideoQualities
+        : QualityOption.AudioQualities;
 
     [ObservableProperty]
     private string _urlInput = string.Empty;
+
+    public bool HasUrlInput => !string.IsNullOrWhiteSpace(UrlInput);
+
+    public string UrlCountText => _localizer.Language == "ru"
+        ? "Ctrl + V — вставить из буфера обмена"
+        : "Ctrl + V — paste from clipboard";
+
+    public string QueueTitle => _localizer.Language == "ru"
+        ? $"Загрузки ({Jobs.Count})"
+        : $"Downloads ({Jobs.Count})";
 
     [ObservableProperty]
     private string _outputFolder = string.Empty;
@@ -64,6 +80,12 @@ public sealed partial class MainViewModel : ObservableObject
     private bool _isDarkTheme = true;
 
     [ObservableProperty]
+    private bool _autoUpdateOnStartup = true;
+
+    [ObservableProperty]
+    private bool _isUpdatingTools;
+
+    [ObservableProperty]
     private string _statusText = Loc.T(LocKeys.StatusReady);
 
     [ObservableProperty]
@@ -76,6 +98,9 @@ public sealed partial class MainViewModel : ObservableObject
     private bool _isCheckingTools = true;
 
     // Advanced yt-dlp options.
+
+    [ObservableProperty]
+    private bool _isAdvOptionsExpanded;
 
     [ObservableProperty]
     private bool _allowPlaylists;
@@ -108,7 +133,7 @@ public sealed partial class MainViewModel : ObservableObject
 
     public IReadOnlyList<LanguageOption> Languages => LanguageOption.All;
 
-    public bool IsQualityEnabled => SelectedFormat.Value.IsVideo();
+    public bool IsQualityEnabled => true;
 
     public bool IsSubtitleOptionEnabled => SelectedFormat.Value.IsVideo();
 
@@ -118,30 +143,39 @@ public sealed partial class MainViewModel : ObservableObject
         ISettingsStore settingsStore,
         AppSettings settings,
         IToolLocator toolLocator,
+        IToolUpdater toolUpdater,
         ToolContext toolContext,
         ILogSink log,
         IFolderService folderService,
         IClipboardService clipboard,
-        ILocalizer localizer)
+        ILocalizer localizer,
+        ILibraryImportService importService,
+        IBulkImportService bulkImportService)
     {
         _urlValidator = urlValidator;
         _coordinator = coordinator;
         _settingsStore = settingsStore;
         _settings = settings;
         _toolLocator = toolLocator;
+        _toolUpdater = toolUpdater;
         _toolContext = toolContext;
         _log = log;
         _folderService = folderService;
         _clipboard = clipboard;
         _localizer = localizer;
-        _dispatcher = System.Windows.Application.Current.Dispatcher;
+        _importService = importService;
+        _bulkImportService = bulkImportService;
+        _dispatcher = System.Windows.Application.Current?.Dispatcher ?? System.Windows.Threading.Dispatcher.CurrentDispatcher;
 
         ApplySettings(settings);
         _isInitialized = true;
 
         _coordinator.JobEnqueued += OnJobEnqueued;
+        _importService.ProgressChanged += OnImportProgressChanged;
+        _bulkImportService.ProgressChanged += OnBulkImportProgressChanged;
         _log.EntryAdded += OnLogEntryAdded;
         _localizer.LanguageChanged += OnLanguageChanged;
+        Jobs.CollectionChanged += (_, _) => OnPropertyChanged(nameof(QueueTitle));
         foreach (var entry in _log.GetSnapshot())
         {
             Logs.Add(entry);
@@ -155,6 +189,8 @@ public sealed partial class MainViewModel : ObservableObject
             // Recompute strings that were captured at their last event.
             RebuildToolStatus();
             UpdateStatus();
+            OnPropertyChanged(nameof(UrlCountText));
+            OnPropertyChanged(nameof(QueueTitle));
             foreach (var job in Jobs)
             {
                 job.RaiseLocalizedTextChanged();
@@ -162,10 +198,15 @@ public sealed partial class MainViewModel : ObservableObject
         });
     }
 
-    /// <summary>Called once after the window is shown: discovers external tools off the UI thread.</summary>
+    /// <summary>Called once after the window is shown: discovers external tools off the UI thread and optionally updates components.</summary>
     public async Task InitializeAsync()
     {
         await RefreshToolsAsync();
+
+        if (AutoUpdateOnStartup && _lastToolLocation.HasYtDlp)
+        {
+            _ = UpdateToolsInternalAsync(isAutomatic: true);
+        }
     }
 
     private void ApplySettings(AppSettings settings)
@@ -176,6 +217,7 @@ public sealed partial class MainViewModel : ObservableObject
         SelectedFormat = Formats.FirstOrDefault(f => f.Value == settings.PreferredFormat) ?? Formats[0];
         SelectedQuality = Qualities.FirstOrDefault(q => q.Value == settings.PreferredQuality) ?? Qualities[0];
         IsDarkTheme = !string.Equals(settings.Theme, ThemeManager.Light, StringComparison.OrdinalIgnoreCase);
+        AutoUpdateOnStartup = settings.AutoUpdateOnStartup;
         AllowPlaylists = settings.AllowPlaylists;
         EmbedMetadata = settings.EmbedMetadata;
         EmbedThumbnail = settings.EmbedThumbnail;
@@ -204,12 +246,21 @@ public sealed partial class MainViewModel : ObservableObject
 
     private void OnJobEnqueued(object? sender, DownloadJob job)
     {
-        _dispatcher.BeginInvoke(() =>
+        void Add()
         {
             Jobs.Add(job);
             job.PropertyChanged += OnJobPropertyChanged;
             UpdateStatus();
-        });
+        }
+
+        if (_dispatcher.CheckAccess())
+        {
+            Add();
+        }
+        else
+        {
+            _dispatcher.BeginInvoke(Add);
+        }
     }
 
     private void OnJobPropertyChanged(object? sender, PropertyChangedEventArgs e)
@@ -248,6 +299,7 @@ public sealed partial class MainViewModel : ObservableObject
                 case DownloadStage.Completed: completed++; break;
                 case DownloadStage.Failed: failed++; break;
                 case DownloadStage.Canceled: canceled++; break;
+                case DownloadStage.Paused: break;
                 default: active++; break;
             }
         }
@@ -303,6 +355,7 @@ public sealed partial class MainViewModel : ObservableObject
         _settings.PreferredFormat = SelectedFormat.Value;
         _settings.PreferredQuality = SelectedQuality.Value;
         _settings.Theme = IsDarkTheme ? ThemeManager.Dark : ThemeManager.Light;
+        _settings.AutoUpdateOnStartup = AutoUpdateOnStartup;
         _settings.AllowPlaylists = AllowPlaylists;
         _settings.EmbedMetadata = EmbedMetadata;
         _settings.EmbedThumbnail = EmbedThumbnail;
@@ -350,10 +403,25 @@ public sealed partial class MainViewModel : ObservableObject
 
     partial void OnCustomArgumentsChanged(string value) => SaveSettingsSafe();
 
+    partial void OnAutoUpdateOnStartupChanged(bool value) => SaveSettingsSafe();
+
+    partial void OnUrlInputChanged(string value)
+    {
+        OnPropertyChanged(nameof(HasUrlInput));
+        OnPropertyChanged(nameof(UrlCountText));
+    }
+
     partial void OnSelectedFormatChanged(FormatOption value)
     {
+        OnPropertyChanged(nameof(Qualities));
         OnPropertyChanged(nameof(IsQualityEnabled));
         OnPropertyChanged(nameof(IsSubtitleOptionEnabled));
+
+        if (!Qualities.Any(q => q.Value == SelectedQuality?.Value))
+        {
+            SelectedQuality = Qualities[0];
+        }
+
         SaveSettingsSafe();
     }
 

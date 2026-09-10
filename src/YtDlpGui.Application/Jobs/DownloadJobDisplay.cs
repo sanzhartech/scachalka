@@ -10,8 +10,8 @@ public sealed partial class DownloadJob
     public string DisplayName => string.IsNullOrEmpty(Title) ? Url : Title;
 
     public string FormatText => Request.Format.IsVideo()
-        ? $"{Request.Format.ToShortDisplay()} · {Request.Quality.ToDisplay()}"
-        : Request.Format.ToShortDisplay();
+        ? $"{Request.Format.ToShortDisplay()} • {Request.Quality.ToShortDisplay()}"
+        : $"{Request.Format.ToShortDisplay()} • {Request.Quality.ToAudioDisplay()}";
 
     public string StageText => Stage switch
     {
@@ -20,6 +20,7 @@ public sealed partial class DownloadJob
             : Loc.T(LocKeys.StageQueued),
         DownloadStage.Resolving => Loc.T(LocKeys.StageResolving),
         DownloadStage.Downloading => Loc.T(LocKeys.StageDownloading),
+        DownloadStage.Paused => Loc.T(LocKeys.StagePaused),
         DownloadStage.Merging => Loc.T(LocKeys.StageMerging),
         DownloadStage.Converting => Loc.T(LocKeys.StageConverting),
         DownloadStage.Completed => Loc.T(LocKeys.StageCompleted),
