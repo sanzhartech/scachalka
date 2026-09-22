@@ -13,7 +13,11 @@ public static class StageRules
             or DownloadStage.Merging or DownloadStage.Converting;
 
     public static bool CanCancel(DownloadStage stage) =>
-        stage == DownloadStage.Queued || IsActive(stage);
+        stage is DownloadStage.Queued or DownloadStage.Paused || IsActive(stage);
+
+    public static bool CanPause(DownloadStage stage) => IsActive(stage);
+
+    public static bool CanResume(DownloadStage stage) => stage is DownloadStage.Paused;
 
     public static bool CanRetry(DownloadStage stage) =>
         stage is DownloadStage.Failed or DownloadStage.Canceled;

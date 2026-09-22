@@ -21,4 +21,16 @@ public sealed class WpfClipboardService : IClipboardService
             return null;
         }
     }
+
+    public void SetText(string text)
+    {
+        try
+        {
+            Clipboard.SetText(text);
+        }
+        catch (ExternalException)
+        {
+            // Another process holds the clipboard lock
+        }
+    }
 }

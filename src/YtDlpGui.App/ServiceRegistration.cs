@@ -2,10 +2,14 @@ using Microsoft.Extensions.DependencyInjection;
 using YtDlpGui.Abstractions.Interfaces;
 using YtDlpGui.Abstractions.Localization;
 using YtDlpGui.Application.Execution;
+using YtDlpGui.Application.Import;
 using YtDlpGui.Application.Queue;
 using YtDlpGui.Application.Tools;
 using YtDlpGui.Core.Arguments;
 using YtDlpGui.Core.Errors;
+using YtDlpGui.Core.Library;
+using YtDlpGui.Core.Links;
+using YtDlpGui.Core.Matching;
 using YtDlpGui.Core.Naming;
 using YtDlpGui.Core.Progress;
 using YtDlpGui.Core.Retry;
@@ -41,6 +45,15 @@ public static class ServiceRegistration
         // Argument builder strategies: add new formats here without touching existing code.
         services.AddSingleton<IArgumentBuilder, VideoArgumentBuilder>();
         services.AddSingleton<IArgumentBuilder, AudioArgumentBuilder>();
+        // Library import (Apple Music songs.txt → automatic search + download).
+        services.AddSingleton<ILibraryParser, AppleMusicLibraryParser>();
+        services.AddSingleton<ISongMatchScorer, SongMatchScorer>();
+        // Bulk link import: format sources are tried in registration order —
+        // plain text is the catch-all fallback, so it must stay last.
+        services.AddSingleton<ILinkSource, CsvLinkSource>();
+        services.AddSingleton<ILinkSource, JsonLinkSource>();
+        services.AddSingleton<ILinkSource, PlainTextLinkSource>();
+        services.AddSingleton<BulkLinkAnalyzer>();
 
         // Infrastructure (OS integration).
         services.AddSingleton<Localizer>();
@@ -49,6 +62,7 @@ public static class ServiceRegistration
         services.AddSingleton<ILogSink>(sp => sp.GetRequiredService<LogService>());
         services.AddSingleton<IMediaToolRunner, ProcessMediaToolRunner>();
         services.AddSingleton<IToolLocator, ToolLocator>();
+        services.AddSingleton<IToolUpdater, ToolUpdater>();
         services.AddSingleton<ISettingsStore, JsonSettingsStore>();
         services.AddSingleton<IFolderService, FolderService>();
         services.AddSingleton<IPartialFileCleaner, PartialFileCleaner>();
@@ -60,6 +74,9 @@ public static class ServiceRegistration
         services.AddSingleton<ToolContext>();
         services.AddSingleton<IDownloadExecutor, DownloadExecutor>();
         services.AddSingleton<IDownloadCoordinator, DownloadCoordinator>();
+        services.AddSingleton<IMusicSearchService, YtDlpMusicSearchService>();
+        services.AddSingleton<ILibraryImportService, LibraryImportService>();
+        services.AddSingleton<IBulkImportService, BulkImportService>();
 
         // UI.
         services.AddSingleton<IClipboardService, WpfClipboardService>();

@@ -72,19 +72,24 @@ public sealed class DownloadExecutor(
 
                 case YtDlpEventKind.StageChanged when evt.Stage is not null:
                     ApplyStage(job, evt.Stage.Value);
+                    if (!string.IsNullOrWhiteSpace(evt.Path))
+                    {
+                        job.DestinationFile = ResolveFullPath(job.Request.OutputFolder, evt.Path);
+                        job.Title = Path.GetFileNameWithoutExtension(job.DestinationFile);
+                    }
                     break;
 
                 case YtDlpEventKind.DestinationResolved when evt.Path is not null:
-                    job.DestinationFile = evt.Path;
-                    job.Title = Path.GetFileNameWithoutExtension(evt.Path);
+                    job.DestinationFile = ResolveFullPath(job.Request.OutputFolder, evt.Path);
+                    job.Title = Path.GetFileNameWithoutExtension(job.DestinationFile);
                     break;
 
                 case YtDlpEventKind.AlreadyDownloaded:
                     alreadyDownloaded = true;
                     if (evt.Path is not null)
                     {
-                        job.DestinationFile = evt.Path;
-                        job.Title = Path.GetFileNameWithoutExtension(evt.Path);
+                        job.DestinationFile = ResolveFullPath(job.Request.OutputFolder, evt.Path);
+                        job.Title = Path.GetFileNameWithoutExtension(job.DestinationFile);
                     }
                     break;
             }
@@ -93,10 +98,31 @@ public sealed class DownloadExecutor(
         void OnError(string line) => log.Write(LogLevel.Warning, $"[{Short(job)}] {line}");
 
         ToolResult result;
+        var usedCookieFallback = false;
         try
         {
             result = await runner.RunAsync(tools.YtDlpPath!, arguments, OnOutput, OnError, cancellationToken)
                 .ConfigureAwait(false);
+
+            // A running browser locks its cookie database (yt-dlp #7271). Instead of
+            // failing the whole download, transparently retry once without cookies.
+            if (NeedsCookieFallback(job, result))
+            {
+                log.Write(LogLevel.Warning,
+                    $"[{Short(job)}] Browser cookie database is locked — retrying without cookies. " +
+                    "Close the browser completely to use its cookies.");
+                job.Stage = DownloadStage.Resolving;
+
+                var fallbackRequest = job.Request with
+                {
+                    Options = job.Request.EffectiveOptions with { CookiesFromBrowser = string.Empty }
+                };
+                var fallbackArguments = builder.Build(fallbackRequest, tools);
+                result = await runner.RunAsync(
+                        tools.YtDlpPath!, fallbackArguments, OnOutput, OnError, cancellationToken)
+                    .ConfigureAwait(false);
+                usedCookieFallback = true;
+            }
         }
         catch (Exception ex)
         {
@@ -106,7 +132,19 @@ public sealed class DownloadExecutor(
         }
 
         CompleteJob(job, result, alreadyDownloaded);
+
+        if (usedCookieFallback && job.Stage == DownloadStage.Completed)
+        {
+            job.StatusNote = Loc.T(LocKeys.NoteCookiesFallback);
+        }
     }
+
+    /// <summary>True when the failure is the locked-browser-cookie-DB case and cookies were in use.</summary>
+    private bool NeedsCookieFallback(DownloadJob job, ToolResult result) =>
+        !result.WasCanceled
+        && result.ExitCode != 0
+        && !string.IsNullOrWhiteSpace(job.Request.EffectiveOptions.CookiesFromBrowser)
+        && classifier.Classify(result.ExitCode, result.StdErrTail) == DownloadErrorKind.CookieBrowserLocked;
 
     private bool ValidateTools(DownloadJob job, ToolLocation tools)
     {
@@ -176,6 +214,17 @@ public sealed class DownloadExecutor(
     {
         if (result.WasCanceled)
         {
+            if (job.IsPauseRequested)
+            {
+                job.IsPauseRequested = false;
+                job.Stage = DownloadStage.Paused;
+                job.StatusNote = Loc.T(LocKeys.StagePaused);
+                job.SpeedBytesPerSecond = null;
+                job.EtaSeconds = null;
+                log.Write(LogLevel.Info, $"[{Short(job)}] Paused.");
+                return;
+            }
+
             job.Stage = DownloadStage.Canceled;
             job.StatusNote = Loc.T(LocKeys.NoteCanceled);
             log.Write(LogLevel.Info, $"[{Short(job)}] Canceled.");
@@ -190,6 +239,7 @@ public sealed class DownloadExecutor(
             job.EtaSeconds = null;
             job.Stage = DownloadStage.Completed;
             job.StatusNote = alreadyDownloaded ? Loc.T(LocKeys.NoteAlreadyExisted) : null;
+            EnsureFinalDestinationFile(job);
             log.Write(LogLevel.Info, $"[{Short(job)}] Completed: {job.DestinationFile ?? job.Url}");
             return;
         }
@@ -220,4 +270,105 @@ public sealed class DownloadExecutor(
     }
 
     private static string Short(DownloadJob job) => job.Id.ToString("N")[..8];
+
+    private static string ResolveFullPath(string baseFolder, string path)
+    {
+        var clean = path.Trim().Trim('"');
+        if (clean.StartsWith(@"\\?\", StringComparison.Ordinal))
+        {
+            clean = clean[4..];
+        }
+
+        if (Path.IsPathRooted(clean))
+        {
+            return Path.GetFullPath(clean);
+        }
+
+        return Path.GetFullPath(Path.Combine(baseFolder, clean));
+    }
+
+    private void EnsureFinalDestinationFile(DownloadJob job)
+    {
+        try
+        {
+            // 1. If job.DestinationFile is set and exists, normalize to full path.
+            if (!string.IsNullOrWhiteSpace(job.DestinationFile))
+            {
+                var candidate = ResolveFullPath(job.Request.OutputFolder, job.DestinationFile);
+                if (File.Exists(candidate))
+                {
+                    job.DestinationFile = candidate;
+                    job.Title = Path.GetFileNameWithoutExtension(candidate);
+                    return;
+                }
+
+                // 2. If it points to an intermediate stream (e.g. .f137.mp4, .f140.m4a, .temp.mp4),
+                // strip the intermediate format tag and check if the merged target exists.
+                var stripped = System.Text.RegularExpressions.Regex.Replace(
+                    candidate, @"\.(?:f\d+|temp|part)(\.[a-zA-Z0-9]+)$", "$1", System.Text.RegularExpressions.RegexOptions.IgnoreCase);
+                if (File.Exists(stripped))
+                {
+                    job.DestinationFile = stripped;
+                    job.Title = Path.GetFileNameWithoutExtension(stripped);
+                    return;
+                }
+
+                // Check with base name without format tag in the same directory
+                var dir = Path.GetDirectoryName(candidate);
+                if (!string.IsNullOrWhiteSpace(dir) && Directory.Exists(dir))
+                {
+                    var baseName = Path.GetFileNameWithoutExtension(stripped);
+                    baseName = System.Text.RegularExpressions.Regex.Replace(
+                        baseName, @"\.f\d+$", "", System.Text.RegularExpressions.RegexOptions.IgnoreCase);
+
+                    var matchingFiles = Directory.GetFiles(dir, $"{baseName}.*")
+                        .Where(f => !f.EndsWith(".part", StringComparison.OrdinalIgnoreCase)
+                                 && !f.EndsWith(".ytdl", StringComparison.OrdinalIgnoreCase))
+                        .ToList();
+
+                    if (matchingFiles.Count > 0)
+                    {
+                        var preferredExt = "." + job.Request.Format.ToString().ToLowerInvariant();
+                        var best = matchingFiles.FirstOrDefault(f => f.EndsWith(preferredExt, StringComparison.OrdinalIgnoreCase))
+                                   ?? matchingFiles.OrderByDescending(File.GetLastWriteTimeUtc).First();
+
+                        job.DestinationFile = Path.GetFullPath(best);
+                        job.Title = Path.GetFileNameWithoutExtension(best);
+                        return;
+                    }
+                }
+            }
+
+            // 3. Fallback: inspect output folder for recently written media file
+            if (Directory.Exists(job.Request.OutputFolder))
+            {
+                var minTime = job.StartedAt?.UtcDateTime.AddSeconds(-5) ?? DateTime.UtcNow.AddMinutes(-5);
+                var candidates = Directory.GetFiles(job.Request.OutputFolder, "*.*", SearchOption.AllDirectories)
+                    .Where(f => !f.EndsWith(".part", StringComparison.OrdinalIgnoreCase)
+                             && !f.EndsWith(".ytdl", StringComparison.OrdinalIgnoreCase))
+                    .Select(f => new FileInfo(f))
+                    .Where(fi => fi.LastWriteTimeUtc >= minTime)
+                    .OrderByDescending(fi => fi.LastWriteTimeUtc)
+                    .ToList();
+
+                if (candidates.Count > 0)
+                {
+                    FileInfo? bestMatch = null;
+                    if (!string.IsNullOrWhiteSpace(job.Title))
+                    {
+                        bestMatch = candidates.FirstOrDefault(fi =>
+                            fi.Name.Contains(job.Title, StringComparison.OrdinalIgnoreCase));
+                    }
+
+                    bestMatch ??= candidates[0];
+                    job.DestinationFile = bestMatch.FullName;
+                    job.Title = Path.GetFileNameWithoutExtension(bestMatch.FullName);
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            log.Write(LogLevel.Warning, $"[{Short(job)}] Could not resolve final destination file: {ex.Message}");
+        }
+    }
 }

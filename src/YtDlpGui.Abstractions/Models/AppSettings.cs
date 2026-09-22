@@ -20,6 +20,9 @@ public sealed class AppSettings
     /// <summary>How many downloads may run at the same time (clamped to 1..4 at use site).</summary>
     public int MaxConcurrentDownloads { get; set; } = 2;
 
+    /// <summary>Whether to check and update yt-dlp automatically on application startup.</summary>
+    public bool AutoUpdateOnStartup { get; set; } = true;
+
     // Advanced yt-dlp options (persisted between sessions).
 
     public bool AllowPlaylists { get; set; }
