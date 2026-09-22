@@ -200,6 +200,11 @@ YtDlpGui.App            composition root: DI wiring, app lifecycle
 
 See [CONTRIBUTING.md](CONTRIBUTING.md) for the full module guide.
 
+## Documentation
+- 📐 [Detailed Architecture Guide](docs/ARCHITECTURE.md) — deep dive into layers, patterns, and sequences.
+- 📖 [User Guide](docs/USER_GUIDE.md) — complete user manual with installation and usage instructions.
+- 🎓 [Project Defense Material](docs/DEFENSE_PRESENTATION.md) — academic presentation outline, talking points, and Q&A.
+
 ## Legal
 
 Scachalka is a general-purpose GUI wrapper for yt-dlp. Use it only for content you are
@@ -268,5 +273,11 @@ dotnet publish -c Release -r win-x64 --self-contained true
 **Свой логотип:** замените `assets/logo.png` своим квадратным PNG и выполните
 `pwsh tools/generate-icon.ps1`.
 
+### Документация
+- 📐 [Подробная архитектура проекта](docs/ARCHITECTURE.md) — слои, паттерны, диаграммы вызовов.
+- 📖 [Руководство пользователя](docs/USER_GUIDE.md) — установка, сценарии работы, настройки, решение проблем.
+- 🎓 [Материалы для защиты проекта](docs/DEFENSE_PRESENTATION.md) — паспорт, доклад, архитектурные акценты, вопросы и ответы комиссии.
+
 **Важно:** программа предназначена только для контента, который вам разрешено скачивать.
 Функций для обхода защит сайтов (anti-bot, DRM) в ней нет и не будет.
+
