@@ -26,4 +26,25 @@ public static class VideoQualityExtensions
         VideoQuality.Q360 => "360p",
         _ => quality.ToString()
     };
+
+    public static string ToAudioDisplay(this VideoQuality quality) => quality switch
+    {
+        VideoQuality.Best => "320 kbps",
+        VideoQuality.Q1440 => "256 kbps",
+        VideoQuality.Q1080 => "192 kbps",
+        VideoQuality.Q720 => "128 kbps",
+        _ => "320 kbps"
+    };
+
+    public static string ToShortDisplay(this VideoQuality quality) => quality switch
+    {
+        VideoQuality.Best => "Best",
+        VideoQuality.Q2160 => "4K",
+        VideoQuality.Q1440 => "1440p",
+        VideoQuality.Q1080 => "1080p",
+        VideoQuality.Q720 => "720p",
+        VideoQuality.Q480 => "480p",
+        VideoQuality.Q360 => "360p",
+        _ => quality.ToString()
+    };
 }

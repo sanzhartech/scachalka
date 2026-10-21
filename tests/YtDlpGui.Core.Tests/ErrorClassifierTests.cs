@@ -20,6 +20,10 @@ public sealed class ErrorClassifierTests
     [InlineData("PermissionError: [Errno 13] Permission denied", DownloadErrorKind.PermissionDenied)]
     [InlineData("ERROR: Unable to download webpage: <urlopen error timed out>", DownloadErrorKind.Network)]
     [InlineData("urllib.error.URLError: getaddrinfo failed", DownloadErrorKind.Network)]
+    [InlineData("ERROR: Could not copy Chrome cookie database. See  https://github.com/yt-dlp/yt-dlp/issues/7271  for more info",
+        DownloadErrorKind.CookieBrowserLocked)]
+    [InlineData("ERROR: Could not copy Edge cookie database.", DownloadErrorKind.CookieBrowserLocked)]
+    [InlineData("WARNING: Failed to decrypt with DPAPI", DownloadErrorKind.CookieBrowserLocked)]
     [InlineData("something completely new", DownloadErrorKind.Unknown)]
     public void Classify_MapsStderrPatterns(string stderr, DownloadErrorKind expected)
     {
@@ -65,5 +69,6 @@ public sealed class ErrorClassifierTests
         Assert.True(policy.CanRetry(DownloadErrorKind.Network));
         Assert.True(policy.CanRetry(DownloadErrorKind.DiskFull));
         Assert.True(policy.CanRetry(DownloadErrorKind.ToolMissing));
+        Assert.True(policy.CanRetry(DownloadErrorKind.CookieBrowserLocked));
     }
 }

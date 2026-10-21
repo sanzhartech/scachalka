@@ -14,6 +14,10 @@ public sealed class ErrorClassifier : IErrorClassifier
     // Python errno text and localized-agnostic OS error fragments.
     private static readonly (DownloadErrorKind Kind, string[] Patterns)[] Rules =
     [
+        // Must be first: a running browser locks its cookie DB (yt-dlp issue #7271);
+        // the same stderr often also contains generic "Permission denied" fragments.
+        (DownloadErrorKind.CookieBrowserLocked,
+            ["cookie database", "Failed to decrypt with DPAPI", "Failed to read extraction keys"]),
         (DownloadErrorKind.InvalidUrl,
             ["Unsupported URL", "is not a valid URL", "Incomplete YouTube ID", "URL could be a direct video link"]),
         (DownloadErrorKind.DiskFull,
@@ -66,6 +70,7 @@ public sealed class ErrorClassifier : IErrorClassifier
             DownloadErrorKind.PermissionDenied => LocKeys.ErrorPermission,
             DownloadErrorKind.FileExists => LocKeys.ErrorFileExists,
             DownloadErrorKind.Interrupted => LocKeys.ErrorInterrupted,
+            DownloadErrorKind.CookieBrowserLocked => LocKeys.ErrorCookieLocked,
             _ => LocKeys.ErrorUnknown
         };
 

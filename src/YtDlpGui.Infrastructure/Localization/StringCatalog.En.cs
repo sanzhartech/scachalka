@@ -2,23 +2,31 @@ using YtDlpGui.Abstractions.Localization;
 
 namespace YtDlpGui.Infrastructure.Localization;
 
-/// <summary>English string catalog (default / fallback language).</summary>
-internal static partial class StringCatalog
+public static partial class StringCatalog
 {
     public static IReadOnlyDictionary<string, string> English { get; } = new Dictionary<string, string>
     {
         [LocKeys.ToolsChecking] = "Checking for yt-dlp and FFmpeg…",
         [LocKeys.ToolsRecheck] = "Re-check tools",
+        [LocKeys.ToolsUpdate] = "Update tools",
+        [LocKeys.ToolsUpdating] = "Checking and updating components…",
+        [LocKeys.ToolsUpToDate] = "Components are up to date.",
+        [LocKeys.ToolsUpdatedFormat] = "yt-dlp updated to {0}.",
+        [LocKeys.ToolsUpdateFailedFormat] = "Failed to update components: {0}",
+        [LocKeys.ToolsNotFound] = "yt-dlp was not found on your system.",
+        [LocKeys.ToolsUpdatePermissionDenied] = "Permission denied while updating yt-dlp. Try running as administrator or updating via WinGet.",
+        [LocKeys.ToolsUpdateNetworkError] = "Network error while checking for updates. Check your connection.",
+        [LocKeys.ToolsUpdateCancelled] = "Component update was cancelled.",
         [LocKeys.ToolsReadyFormat] = "yt-dlp {0} · {1}",
         [LocKeys.ToolsMissingFormat] = "Missing: {0}. Install them (e.g. \"winget install yt-dlp.yt-dlp Gyan.FFmpeg\") or put the .exe files next to Scachalka.exe.",
         [LocKeys.ToolsMissingJoin] = " and ",
         [LocKeys.ToolsCheckFailed] = "Tool check failed — see the log.",
 
-        [LocKeys.UrlHint] = "Video / audio URLs — one or many, separated by spaces or new lines. Drag & drop works too.",
+        [LocKeys.UrlHint] = "Supports YouTube, TikTok, Instagram, Facebook, and other platforms.",
         [LocKeys.BtnAddToQueue] = "Add to queue",
         [LocKeys.BtnAddTooltip] = "Ctrl+Enter",
-        [LocKeys.BtnPasteAdd] = "Paste & add",
-        [LocKeys.BtnPasteTooltip] = "Ctrl+Shift+V — add URLs straight from the clipboard",
+        [LocKeys.BtnPasteAdd] = "Paste & Download",
+        [LocKeys.BtnPasteTooltip] = "Ctrl+V — paste URLs and start downloading",
 
         [LocKeys.LabelFormat] = "Format",
         [LocKeys.LabelQuality] = "Quality",
@@ -27,6 +35,7 @@ internal static partial class StringCatalog
         [LocKeys.BtnBrowse] = "Browse…",
         [LocKeys.BtnOpenFolder] = "Open folder",
         [LocKeys.CheckDarkTheme] = "Dark theme",
+        [LocKeys.CheckAutoUpdateOnStartup] = "Auto-update components on startup",
 
         [LocKeys.AdvHeader] = "Advanced yt-dlp options",
         [LocKeys.AdvPlaylists] = "Download playlists",
@@ -46,6 +55,8 @@ internal static partial class StringCatalog
         [LocKeys.QueueTitle] = "Download queue",
         [LocKeys.QueueClearFinished] = "Clear finished",
         [LocKeys.JobCancel] = "Cancel",
+        [LocKeys.JobPause] = "Pause",
+        [LocKeys.JobResume] = "Resume",
         [LocKeys.JobRetry] = "Retry",
         [LocKeys.JobShowInFolder] = "Show in folder",
         [LocKeys.JobEtaPrefix] = "ETA",
@@ -55,6 +66,7 @@ internal static partial class StringCatalog
         [LocKeys.StageQueuedRetryFormat] = "Queued (retry #{0})",
         [LocKeys.StageResolving] = "Fetching metadata…",
         [LocKeys.StageDownloading] = "Downloading",
+        [LocKeys.StagePaused] = "Paused",
         [LocKeys.StageMerging] = "Merging",
         [LocKeys.StageConverting] = "Converting",
         [LocKeys.StageCompleted] = "Completed",
@@ -71,6 +83,49 @@ internal static partial class StringCatalog
         [LocKeys.NoteCanceled] = "Canceled by user.",
         [LocKeys.NoteCanceledBeforeStart] = "Canceled before start.",
         [LocKeys.NoteAlreadyExisted] = "File already existed — download skipped.",
+        [LocKeys.NoteCookiesFallback] = "Browser cookies were locked (browser is open) — downloaded without cookies.",
+
+        [LocKeys.BtnImportLibrary] = "Import Apple Music Library",
+        [LocKeys.BtnImportLibraryTooltip] = "Pick an exported songs.txt — every song is found and downloaded automatically",
+        [LocKeys.ImportCancel] = "Cancel import",
+        [LocKeys.ImportFileDialogTitle] = "Choose the exported Apple Music library (songs.txt)",
+        [LocKeys.ImportReading] = "Reading library…",
+        [LocKeys.ImportFoundFormat] = "Found {0} songs.",
+        [LocKeys.ImportNoSongs] = "No songs found in the file.",
+        [LocKeys.ImportSearchingFormat] = "Searching {0} / {1}: {2}",
+        [LocKeys.ImportMatchedFormat] = "Matched: {0} · Confidence: {1}%",
+        [LocKeys.ImportSkippedFormat] = "Skipped: {0}",
+        [LocKeys.ImportDownloadingFormat] = "Downloading {0} / {1}",
+        [LocKeys.ImportWaitingDownloads] = "Search finished — waiting for the queue to finish downloading…",
+        [LocKeys.ImportDoneFormat] = "Library imported. Songs found: {0} · Downloaded: {1} · Skipped: {2} · Failed: {3} · Total time: {4}",
+        [LocKeys.ImportFailedSavedFormat] = "Failed list saved to: {0}",
+        [LocKeys.ImportCanceled] = "Import canceled.",
+        [LocKeys.ImportFailed] = "Import failed — see the log.",
+        [LocKeys.ImportAlreadyRunning] = "A library import is already running.",
+        [LocKeys.ImportReasonNoMatch] = "No match found",
+        [LocKeys.ImportReasonLowConfidenceFormat] = "Confidence too low ({0}%)",
+        [LocKeys.ImportReasonDownloadFailed] = "Download failed",
+
+        [LocKeys.BtnBulkImport] = "Bulk Import Links",
+        [LocKeys.BtnBulkImportTooltip] = "Import a CSV / TXT / JSON file with hundreds of links — every valid one goes straight to the queue",
+        [LocKeys.BulkFileDialogTitle] = "Choose a file with links (CSV, TXT or JSON)",
+        [LocKeys.BulkReading] = "Reading file…",
+        [LocKeys.BulkValidatingFormat] = "Found {0} rows — validating URLs…",
+        [LocKeys.BulkQueueingFormat] = "Adding to queue… {0} / {1}",
+        [LocKeys.BulkStatsFormat] = "Valid: {0} · Duplicates skipped: {1} · Invalid: {2}",
+        [LocKeys.BulkDoneFormat] = "Bulk import complete. Imported: {0} · Queued: {1} · Duplicates: {2} · Invalid: {3} · Downloaded: {4} · Total time: {5}",
+        [LocKeys.BulkNoLinks] = "No links found in the file.",
+        [LocKeys.BulkReasonInvalid] = "Invalid URL",
+        [LocKeys.BulkReasonUnsupportedDomain] = "Unsupported domain",
+        [LocKeys.BulkReasonMissing] = "Missing URL",
+        [LocKeys.BulkReasonDuplicate] = "Duplicate",
+
+        [LocKeys.MatchOfficialMusicTrack] = "Official YouTube Music track",
+        [LocKeys.MatchOfficialAudio] = "Official Audio",
+        [LocKeys.MatchOfficialMusicVideo] = "Official Music Video",
+        [LocKeys.MatchVevo] = "VEVO upload",
+        [LocKeys.MatchVerifiedChannel] = "Verified channel",
+        [LocKeys.MatchHighConfidence] = "Best match",
 
         [LocKeys.ErrorToolMissing] = "Required tool not found. Install yt-dlp and FFmpeg, then press \"Re-check tools\".",
         [LocKeys.ErrorInvalidUrl] = "This URL is not supported or not a valid media link.",
@@ -79,6 +134,7 @@ internal static partial class StringCatalog
         [LocKeys.ErrorPermission] = "No permission to write to the output folder. Choose another folder.",
         [LocKeys.ErrorFileExists] = "The file already exists in the output folder.",
         [LocKeys.ErrorInterrupted] = "The download was interrupted before it finished.",
+        [LocKeys.ErrorCookieLocked] = "Could not read browser cookies: the browser is open and locks its cookie database. Close the browser completely (check the tray) or set \"Cookies from browser\" to None.",
         [LocKeys.ErrorUnknown] = "The download failed unexpectedly. See the log for details."
     };
 }

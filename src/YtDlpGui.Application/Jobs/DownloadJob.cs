@@ -15,6 +15,14 @@ public sealed partial class DownloadJob : ObservableObject
     public DownloadJob(DownloadRequest request)
     {
         Request = request ?? throw new ArgumentNullException(nameof(request));
+        ThumbnailUrl = ResolveInitialThumbnail(request.Url);
+    }
+
+    private static string? ResolveInitialThumbnail(string url)
+    {
+        var match = System.Text.RegularExpressions.Regex.Match(
+            url, @"(?:youtu\.be\/|youtube\.com\/(?:embed\/|v\/|watch\?v=|watch\?.+&v=))([\w-]{11})");
+        return match.Success ? $"https://img.youtube.com/vi/{match.Groups[1].Value}/mqdefault.jpg" : null;
     }
 
     public Guid Id { get; } = Guid.NewGuid();
@@ -22,6 +30,9 @@ public sealed partial class DownloadJob : ObservableObject
     public DownloadRequest Request { get; }
 
     public DateTimeOffset CreatedAt { get; } = DateTimeOffset.Now;
+
+    [ObservableProperty]
+    private string? _thumbnailUrl;
 
     /// <summary>Set by the executor when the job leaves the queue; used for .part cleanup.</summary>
     public DateTimeOffset? StartedAt { get; internal set; }
@@ -66,9 +77,18 @@ public sealed partial class DownloadJob : ObservableObject
 
     public bool CanCancel => StageRules.CanCancel(Stage);
 
+    public bool CanPause => StageRules.CanPause(Stage);
+
+    public bool CanResume => StageRules.CanResume(Stage);
+
     public bool CanRetry => StageRules.CanRetry(Stage);
 
     public bool IsTerminal => StageRules.IsTerminal(Stage);
+
+    public bool IsPaused => Stage == DownloadStage.Paused;
+
+    /// <summary>Set when user clicked pause on a running job so executor marks it Paused instead of Canceled.</summary>
+    public bool IsPauseRequested { get; set; }
 
     public bool HasError => Stage == DownloadStage.Failed && !string.IsNullOrEmpty(ErrorMessage);
 
@@ -95,8 +115,11 @@ public sealed partial class DownloadJob : ObservableObject
     partial void OnStageChanged(DownloadStage value)
     {
         OnPropertyChanged(nameof(CanCancel));
+        OnPropertyChanged(nameof(CanPause));
+        OnPropertyChanged(nameof(CanResume));
         OnPropertyChanged(nameof(CanRetry));
         OnPropertyChanged(nameof(IsTerminal));
+        OnPropertyChanged(nameof(IsPaused));
         OnPropertyChanged(nameof(HasError));
         OnPropertyChanged(nameof(IsIndeterminate));
         OnPropertyChanged(nameof(StageText));

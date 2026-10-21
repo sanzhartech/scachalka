@@ -11,13 +11,23 @@ public sealed record FormatOption(MediaFormat Value, string Label)
         [.. Enum.GetValues<MediaFormat>().Select(f => new FormatOption(f, f.ToDisplay()))];
 }
 
-/// <summary>Combo-box item for the video quality selector.</summary>
+/// <summary>Combo-box item for the video or audio quality selector.</summary>
 public sealed record QualityOption(VideoQuality Value, string Label)
 {
     public override string ToString() => Label;
 
-    public static IReadOnlyList<QualityOption> All { get; } =
+    public static IReadOnlyList<QualityOption> VideoQualities { get; } =
         [.. Enum.GetValues<VideoQuality>().Select(q => new QualityOption(q, q.ToDisplay()))];
+
+    public static IReadOnlyList<QualityOption> AudioQualities { get; } =
+    [
+        new(VideoQuality.Best, "320 kbps"),
+        new(VideoQuality.Q1440, "256 kbps"),
+        new(VideoQuality.Q1080, "192 kbps"),
+        new(VideoQuality.Q720, "128 kbps")
+    ];
+
+    public static IReadOnlyList<QualityOption> All => VideoQualities;
 }
 
 /// <summary>Combo-box item for the UI language selector. Labels are endonyms (never translated).</summary>

@@ -9,7 +9,7 @@
     <AssemblyName>Scachalka</AssemblyName>
     <Product>Scachalka</Product>
     <AssemblyTitle>Scachalka</AssemblyTitle>
-    <Version>1.1.0</Version>
+    <Version>1.2.0</Version>
     <!-- Portable single-file executable (applied on dotnet publish). -->
     <PublishSingleFile>true</PublishSingleFile>
     <IncludeNativeLibrariesForSelfExtract>true</IncludeNativeLibrariesForSelfExtract>

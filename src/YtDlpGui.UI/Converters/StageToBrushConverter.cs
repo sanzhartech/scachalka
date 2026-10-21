@@ -16,6 +16,7 @@ public sealed class StageToBrushConverter : IValueConverter
                 DownloadStage.Completed => "Brush.Success",
                 DownloadStage.Failed => "Brush.Danger",
                 DownloadStage.Canceled => "Brush.Warning",
+                DownloadStage.Paused => "Brush.Warning",
                 DownloadStage.Queued => "Brush.Text.Secondary",
                 _ => "Brush.Accent"
             }

@@ -23,8 +23,8 @@ public sealed record YtDlpEvent(
     public static YtDlpEvent ForProgress(ProgressSnapshot snapshot) =>
         new(YtDlpEventKind.Progress, Progress: snapshot);
 
-    public static YtDlpEvent ForStage(DownloadStage stage) =>
-        new(YtDlpEventKind.StageChanged, Stage: stage);
+    public static YtDlpEvent ForStage(DownloadStage stage, string? path = null) =>
+        new(YtDlpEventKind.StageChanged, Stage: stage, Path: path);
 
     public static YtDlpEvent ForDestination(string path) =>
         new(YtDlpEventKind.DestinationResolved, Path: path);

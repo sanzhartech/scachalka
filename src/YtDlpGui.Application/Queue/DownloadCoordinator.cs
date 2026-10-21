@@ -6,6 +6,7 @@ using YtDlpGui.Abstractions.Localization;
 using YtDlpGui.Abstractions.Models;
 using YtDlpGui.Application.Execution;
 using YtDlpGui.Application.Jobs;
+using YtDlpGui.Core.Stages;
 
 namespace YtDlpGui.Application.Queue;
 
@@ -76,8 +77,15 @@ public sealed class DownloadCoordinator : IDownloadCoordinator
     {
         ArgumentNullException.ThrowIfNull(job);
 
+        job.IsPauseRequested = false;
+
         if (_running.TryGetValue(job.Id, out var cts))
         {
+            job.Stage = DownloadStage.Canceled;
+            job.StatusNote = Loc.T(LocKeys.NoteCanceled);
+            job.SpeedBytesPerSecond = null;
+            job.EtaSeconds = null;
+
             try
             {
                 cts.Cancel();
@@ -90,12 +98,78 @@ public sealed class DownloadCoordinator : IDownloadCoordinator
             return;
         }
 
-        // Still waiting in the channel: mark canceled, workers skip non-queued jobs.
+        // Still waiting in the channel or paused: mark canceled, workers skip non-queued jobs.
         if (job.Stage == DownloadStage.Queued)
         {
             job.Stage = DownloadStage.Canceled;
             job.StatusNote = Loc.T(LocKeys.NoteCanceledBeforeStart);
+            job.SpeedBytesPerSecond = null;
+            job.EtaSeconds = null;
         }
+        else if (job.Stage == DownloadStage.Paused)
+        {
+            job.Stage = DownloadStage.Canceled;
+            job.StatusNote = Loc.T(LocKeys.NoteCanceled);
+            job.SpeedBytesPerSecond = null;
+            job.EtaSeconds = null;
+        }
+    }
+
+    public void Pause(DownloadJob job)
+    {
+        ArgumentNullException.ThrowIfNull(job);
+
+        if (!StageRules.CanPause(job.Stage) && job.Stage != DownloadStage.Queued)
+        {
+            return;
+        }
+
+        job.IsPauseRequested = true;
+
+        if (_running.TryGetValue(job.Id, out var cts))
+        {
+            // Set stage immediately so callers see the transition before the worker
+            // processes the cancellation on the background thread.
+            job.Stage = DownloadStage.Paused;
+            job.StatusNote = Loc.T(LocKeys.StagePaused);
+            job.SpeedBytesPerSecond = null;
+            job.EtaSeconds = null;
+
+            try
+            {
+                cts.Cancel();
+            }
+            catch (ObjectDisposedException)
+            {
+            }
+
+            return;
+        }
+
+        if (job.Stage == DownloadStage.Queued)
+        {
+            job.IsPauseRequested = false;
+            job.Stage = DownloadStage.Paused;
+            job.StatusNote = Loc.T(LocKeys.StagePaused);
+            job.SpeedBytesPerSecond = null;
+            job.EtaSeconds = null;
+        }
+    }
+
+    public bool Resume(DownloadJob job)
+    {
+        ArgumentNullException.ThrowIfNull(job);
+        ObjectDisposedException.ThrowIf(_disposed, this);
+
+        if (job.Stage != DownloadStage.Paused)
+        {
+            return false;
+        }
+
+        job.IsPauseRequested = false;
+        job.Stage = DownloadStage.Queued;
+        job.StatusNote = null;
+        return _pending.Writer.TryWrite(job);
     }
 
     public bool Retry(DownloadJob job)
@@ -134,6 +208,23 @@ public sealed class DownloadCoordinator : IDownloadCoordinator
                 try
                 {
                     await _executor.ExecuteAsync(job, jobCts.Token).ConfigureAwait(false);
+                }
+                catch (OperationCanceledException) when (job.IsPauseRequested)
+                {
+                    // Pause was requested — the stage was already set to Paused by Pause().
+                    // Clear the flag so a future resume starts cleanly.
+                    job.IsPauseRequested = false;
+                }
+                catch (OperationCanceledException)
+                {
+                    // Normal cancellation (stop/shutdown) — not a pause.
+                    if (!StageRules.IsTerminal(job.Stage))
+                    {
+                        job.Stage = DownloadStage.Canceled;
+                        job.StatusNote = Loc.T(LocKeys.NoteCanceled);
+                        job.SpeedBytesPerSecond = null;
+                        job.EtaSeconds = null;
+                    }
                 }
                 catch (Exception ex)
                 {

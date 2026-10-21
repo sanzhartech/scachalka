@@ -18,9 +18,15 @@
     <PackageReference Include="CommunityToolkit.Mvvm" Version="8.2.2" />
   </ItemGroup>
 
-  <!-- Window icon, linked from the shared assets folder (single source of truth). -->
+  <!-- Shared assets embedded as WPF assembly resources -->
   <ItemGroup Condition="Exists('..\..\assets\scachalka.ico')">
     <Resource Include="..\..\assets\scachalka.ico" Link="Assets\scachalka.ico" />
+  </ItemGroup>
+  <ItemGroup Condition="Exists('Assets\free-icon-link-2985013.png')">
+    <Resource Include="Assets\free-icon-link-2985013.png" />
+  </ItemGroup>
+  <ItemGroup Condition="!Exists('Assets\free-icon-link-2985013.png') and Exists('..\..\assets\free-icon-link-2985013.png')">
+    <Resource Include="..\..\assets\free-icon-link-2985013.png" Link="Assets\free-icon-link-2985013.png" />
   </ItemGroup>
 
 </Project>
